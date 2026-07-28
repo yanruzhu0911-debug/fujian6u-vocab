@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>闽教版六年级上册英语单词</title>
+  <title>闽教版小学英语背单词</title>
   <style>
     :root {
       --primary: #4F46E5;
@@ -190,13 +190,32 @@
     .unit-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .unit-filter button { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--border); background: #fff; font-size: 13px; cursor: pointer; }
     .unit-filter button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .semester-select { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .semester-select button { padding: 8px 14px; border-radius: 16px; border: 1px solid var(--border); background: #fff; font-size: 14px; cursor: pointer; }
+    .semester-select button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .hidden { display: none !important; }
     footer { text-align: center; color: var(--muted); font-size: 12px; padding: 12px; }
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
   <header>
-    <h1>闽教版六上英语单词</h1>
+    <h1>闽教版小学英语</h1>
     <nav>
       <button id="nav-practice" class="active" onclick="showPage('practice')">背词</button>
       <button id="nav-wordlist" onclick="showPage('wordlist')">词表</button>
@@ -208,6 +227,8 @@
     <!-- 练习页 -->
     <section id="page-practice">
       <div class="card">
+        <div class="section-title" style="font-size:15px;color:var(--muted);font-weight:500;margin-bottom:8px">选择学期</div>
+        <div class="semester-select" id="semester-select"></div>
         <div class="mode-select">
           <button id="mode-en2cn" class="active" onclick="setMode('en2cn')">英译汉</button>
           <button id="mode-cn2en" onclick="setMode('cn2en')">汉译英</button>
@@ -235,6 +256,7 @@
     <section id="page-wordlist" class="hidden">
       <div class="card">
         <div class="section-title">全部单词</div>
+        <div class="semester-select" id="wordlist-semester-select"></div>
         <div class="unit-filter" id="wordlist-unit-filter"></div>
         <div class="word-list" id="word-list"></div>
       </div>
@@ -252,125 +274,204 @@
   </main>
 
   <footer>本地背单词 · 数据保存在浏览器中</footer>
+  <div class="toast" id="toast"></div>
 
   <script>
-    // 闽教版六年级上册单词数据
-    const wordData = [
-      // Unit 1 The Olympic Games
-      { unit: 1, en: "Olympic", cn: "奥林匹克运动会的", ipa: "əˈlɪmpɪk" },
-      { unit: 1, en: "game", cn: "游戏；比赛", ipa: "ɡeɪm" },
-      { unit: 1, en: "Olympic Games", cn: "奥林匹克运动会", ipa: "əˈlɪmpɪk ɡeɪmz" },
-      { unit: 1, en: "take place", cn: "举行", ipa: "teɪk pleɪs" },
-      { unit: 1, en: "Summer Olympics", cn: "夏季奥运会", ipa: "ˈsʌmə əˈlɪmpɪks" },
-      { unit: 1, en: "Winter Olympics", cn: "冬季奥运会", ipa: "ˈwɪntə əˈlɪmpɪks" },
-      { unit: 1, en: "ring", cn: "环", ipa: "rɪŋ" },
-      { unit: 1, en: "Olympic Flag", cn: "奥运会旗", ipa: "əˈlɪmpɪk flæɡ" },
-      { unit: 1, en: "answer", cn: "回答", ipa: "ˈɑːnsə(r)" },
-      { unit: 1, en: "hold", cn: "举办", ipa: "həʊld" },
-      { unit: 1, en: "something", cn: "某事物", ipa: "ˈsʌmθɪŋ" },
-      { unit: 1, en: "began", cn: "开始（begin的过去式）", ipa: "bɪˈɡæn" },
-      { unit: 1, en: "slogan", cn: "口号", ipa: "ˈsləʊɡən" },
-      { unit: 1, en: "world", cn: "世界", ipa: "wɜːld" },
-      { unit: 1, en: "dream", cn: "梦想", ipa: "driːm" },
-      { unit: 1, en: "strong", cn: "强壮的", ipa: "strɒŋ" },
-      { unit: 1, en: "together", cn: "一起", ipa: "təˈɡeðə(r)" },
-
-      // Unit 2 Physical Exercises
-      { unit: 2, en: "between", cn: "在……（两者）之间", ipa: "bɪˈtwiːn" },
-      { unit: 2, en: "woman", cn: "妇女（复数women）", ipa: "ˈwʊmən" },
-      { unit: 2, en: "healthy", cn: "健康的", ipa: "ˈhelθi" },
-      { unit: 2, en: "exercise", cn: "锻炼", ipa: "ˈeksəsaɪz" },
-      { unit: 2, en: "always", cn: "总是", ipa: "ˈɔːlweɪz" },
-      { unit: 2, en: "often", cn: "经常", ipa: "ˈɒfn" },
-      { unit: 2, en: "sometimes", cn: "有时", ipa: "ˈsʌmtaɪmz" },
-      { unit: 2, en: "pass", cn: "传递", ipa: "pɑːs" },
-      { unit: 2, en: "ball", cn: "球", ipa: "bɔːl" },
-      { unit: 2, en: "catch", cn: "接住", ipa: "kætʃ" },
-      { unit: 2, en: "cry", cn: "喊叫", ipa: "kraɪ" },
-      { unit: 2, en: "cheer", cn: "欢呼", ipa: "tʃɪə(r)" },
-      { unit: 2, en: "their", cn: "他们的", ipa: "ðeə(r)" },
-      { unit: 2, en: "team", cn: "（体育的）队", ipa: "tiːm" },
-
-      // Unit 3 Food and Health
-      { unit: 3, en: "bring", cn: "带来", ipa: "brɪŋ" },
-      { unit: 3, en: "basket", cn: "篮子", ipa: "ˈbɑːskɪt" },
-      { unit: 3, en: "candy", cn: "糖果", ipa: "ˈkændi" },
-      { unit: 3, en: "bad", cn: "坏的", ipa: "bæd" },
-      { unit: 3, en: "teeth", cn: "牙齿（单数tooth）", ipa: "tiːθ" },
-      { unit: 3, en: "keep", cn: "保持", ipa: "kiːp" },
-      { unit: 3, en: "body", cn: "身体", ipa: "ˈbɒdi" },
-      { unit: 3, en: "menu", cn: "菜单", ipa: "ˈmenjuː" },
-      { unit: 3, en: "delicious", cn: "美味的", ipa: "dɪˈlɪʃəs" },
-      { unit: 3, en: "any", cn: "任何的；任何一个", ipa: "ˈeni" },
-      { unit: 3, en: "problem", cn: "问题", ipa: "ˈprɒbləm" },
-      { unit: 3, en: "salad", cn: "色拉", ipa: "ˈsæləd" },
-
-      // Unit 4 Buying New Clothes
-      { unit: 4, en: "daughter", cn: "女儿", ipa: "ˈdɔːtə(r)" },
-      { unit: 4, en: "son", cn: "儿子", ipa: "sʌn" },
-      { unit: 4, en: "clothes", cn: "衣服", ipa: "kləʊðz" },
-      { unit: 4, en: "shirt", cn: "衬衫", ipa: "ʃɜːt" },
-      { unit: 4, en: "shorts", cn: "短裤", ipa: "ʃɔːts" },
-      { unit: 4, en: "cap", cn: "帽子", ipa: "kæp" },
-      { unit: 4, en: "sweater", cn: "毛衣", ipa: "ˈswetə(r)" },
-      { unit: 4, en: "trousers", cn: "裤子", ipa: "ˈtraʊzəz" },
-      { unit: 4, en: "shoes", cn: "鞋子", ipa: "ʃuːz" },
-      { unit: 4, en: "socks", cn: "袜子", ipa: "sɒks" },
-      { unit: 4, en: "size", cn: "尺码", ipa: "saɪz" },
-      { unit: 4, en: "try on", cn: "试穿", ipa: "traɪ ɒn" },
-      { unit: 4, en: "fit", cn: "适合", ipa: "fɪt" },
-      { unit: 4, en: "pound", cn: "英镑", ipa: "paʊnd" },
-      { unit: 4, en: "expensive", cn: "昂贵的", ipa: "ɪkˈspensɪv" },
-      { unit: 4, en: "cheap", cn: "便宜的", ipa: "tʃiːp" },
-
-      // Unit 5 Housework
-      { unit: 5, en: "housework", cn: "家务", ipa: "ˈhaʊswɜːk" },
-      { unit: 5, en: "clean", cn: "打扫", ipa: "kliːn" },
-      { unit: 5, en: "window", cn: "窗户", ipa: "ˈwɪndəʊ" },
-      { unit: 5, en: "wash", cn: "洗", ipa: "wɒʃ" },
-      { unit: 5, en: "clock", cn: "时钟", ipa: "klɒk" },
-      { unit: 5, en: "water", cn: "给……浇水", ipa: "ˈwɔːtə(r)" },
-      { unit: 5, en: "flower", cn: "花", ipa: "ˈflaʊə(r)" },
-      { unit: 5, en: "cook", cn: "烹饪", ipa: "kʊk" },
-      { unit: 5, en: "meal", cn: "一餐", ipa: "miːl" },
-      { unit: 5, en: "set the table", cn: "摆餐具", ipa: "set ðə ˈteɪbl" },
-      { unit: 5, en: "make the bed", cn: "整理床铺", ipa: "meɪk ðə bed" },
-      { unit: 5, en: "dirty", cn: "脏的", ipa: "ˈdɜːti" },
-      { unit: 5, en: "tidy", cn: "整洁的", ipa: "ˈtaɪdi" },
-
-      // Unit 6 Asking the Way
-      { unit: 6, en: "way", cn: "路；方向", ipa: "weɪ" },
-      { unit: 6, en: "street", cn: "街道", ipa: "striːt" },
-      { unit: 6, en: "straight", cn: "笔直地", ipa: "streɪt" },
-      { unit: 6, en: "turn", cn: "转弯", ipa: "tɜːn" },
-      { unit: 6, en: "left", cn: "左边", ipa: "left" },
-      { unit: 6, en: "right", cn: "右边", ipa: "raɪt" },
-      { unit: 6, en: "crossing", cn: "十字路口", ipa: "ˈkrɒsɪŋ" },
-      { unit: 6, en: " traffic lights", cn: "交通灯", ipa: "ˈtræfɪk laɪts" },
-      { unit: 6, en: "museum", cn: "博物馆", ipa: "mjuˈziːəm" },
-      { unit: 6, en: "hospital", cn: "医院", ipa: "ˈhɒspɪtl" },
-      { unit: 6, en: "bookstore", cn: "书店", ipa: "ˈbʊkstɔː(r)" },
-      { unit: 6, en: "cinema", cn: "电影院", ipa: "ˈsɪnəmə" },
-      { unit: 6, en: "post office", cn: "邮局", ipa: "pəʊst ˈɒfɪs" },
-      { unit: 6, en: "library", cn: "图书馆", ipa: "ˈlaɪbrəri" },
-      { unit: 6, en: "bank", cn: "银行", ipa: "bæŋk" },
-      { unit: 6, en: "near", cn: "在……附近", ipa: "nɪə(r)" },
-      { unit: 6, en: "far", cn: "远的", ipa: "fɑː(r)" },
-      { unit: 6, en: " kilometer", cn: "千米；公里", ipa: "kɪˈlɒmɪtə(r)" }
+    // ================= 单词数据 =================
+    // 数据结构：{ semester: "六年级上册", words: [{ unit, en, cn, ipa }] }
+    const allData = [
+      {
+        semester: "六年级上册",
+        words: [
+          { unit: 1, en: "Olympic", cn: "奥林匹克运动会的", ipa: "əˈlɪmpɪk" },
+          { unit: 1, en: "game", cn: "游戏；比赛", ipa: "ɡeɪm" },
+          { unit: 1, en: "Olympic Games", cn: "奥林匹克运动会", ipa: "əˈlɪmpɪk ɡeɪmz" },
+          { unit: 1, en: "take place", cn: "举行", ipa: "teɪk pleɪs" },
+          { unit: 1, en: "Summer Olympics", cn: "夏季奥运会", ipa: "ˈsʌmə əˈlɪmpɪks" },
+          { unit: 1, en: "Winter Olympics", cn: "冬季奥运会", ipa: "ˈwɪntə əˈlɪmpɪks" },
+          { unit: 1, en: "ring", cn: "环", ipa: "rɪŋ" },
+          { unit: 1, en: "Olympic Flag", cn: "奥运会旗", ipa: "əˈlɪmpɪk flæɡ" },
+          { unit: 1, en: "answer", cn: "回答", ipa: "ˈɑːnsə(r)" },
+          { unit: 1, en: "hold", cn: "举办", ipa: "həʊld" },
+          { unit: 1, en: "something", cn: "某事物", ipa: "ˈsʌmθɪŋ" },
+          { unit: 1, en: "began", cn: "开始（begin的过去式）", ipa: "bɪˈɡæn" },
+          { unit: 1, en: "slogan", cn: "口号", ipa: "ˈsləʊɡən" },
+          { unit: 1, en: "world", cn: "世界", ipa: "wɜːld" },
+          { unit: 1, en: "dream", cn: "梦想", ipa: "driːm" },
+          { unit: 1, en: "strong", cn: "强壮的", ipa: "strɒŋ" },
+          { unit: 1, en: "together", cn: "一起", ipa: "təˈɡeðə(r)" },
+          { unit: 2, en: "between", cn: "在……（两者）之间", ipa: "bɪˈtwiːn" },
+          { unit: 2, en: "woman", cn: "妇女（复数women）", ipa: "ˈwʊmən" },
+          { unit: 2, en: "healthy", cn: "健康的", ipa: "ˈhelθi" },
+          { unit: 2, en: "exercise", cn: "锻炼", ipa: "ˈeksəsaɪz" },
+          { unit: 2, en: "always", cn: "总是", ipa: "ˈɔːlweɪz" },
+          { unit: 2, en: "often", cn: "经常", ipa: "ˈɒfn" },
+          { unit: 2, en: "sometimes", cn: "有时", ipa: "ˈsʌmtaɪmz" },
+          { unit: 2, en: "pass", cn: "传递", ipa: "pɑːs" },
+          { unit: 2, en: "ball", cn: "球", ipa: "bɔːl" },
+          { unit: 2, en: "catch", cn: "接住", ipa: "kætʃ" },
+          { unit: 2, en: "cry", cn: "喊叫", ipa: "kraɪ" },
+          { unit: 2, en: "cheer", cn: "欢呼", ipa: "tʃɪə(r)" },
+          { unit: 2, en: "their", cn: "他们的", ipa: "ðeə(r)" },
+          { unit: 2, en: "team", cn: "（体育的）队", ipa: "tiːm" },
+          { unit: 3, en: "bring", cn: "带来", ipa: "brɪŋ" },
+          { unit: 3, en: "basket", cn: "篮子", ipa: "ˈbɑːskɪt" },
+          { unit: 3, en: "candy", cn: "糖果", ipa: "ˈkændi" },
+          { unit: 3, en: "bad", cn: "坏的", ipa: "bæd" },
+          { unit: 3, en: "teeth", cn: "牙齿（单数tooth）", ipa: "tiːθ" },
+          { unit: 3, en: "keep", cn: "保持", ipa: "kiːp" },
+          { unit: 3, en: "body", cn: "身体", ipa: "ˈbɒdi" },
+          { unit: 3, en: "menu", cn: "菜单", ipa: "ˈmenjuː" },
+          { unit: 3, en: "delicious", cn: "美味的", ipa: "dɪˈlɪʃəs" },
+          { unit: 3, en: "any", cn: "任何的；任何一个", ipa: "ˈeni" },
+          { unit: 3, en: "problem", cn: "问题", ipa: "ˈprɒbləm" },
+          { unit: 3, en: "salad", cn: "色拉", ipa: "ˈsæləd" },
+          { unit: 4, en: "daughter", cn: "女儿", ipa: "ˈdɔːtə(r)" },
+          { unit: 4, en: "son", cn: "儿子", ipa: "sʌn" },
+          { unit: 4, en: "clothes", cn: "衣服", ipa: "kləʊðz" },
+          { unit: 4, en: "shirt", cn: "衬衫", ipa: "ʃɜːt" },
+          { unit: 4, en: "shorts", cn: "短裤", ipa: "ʃɔːts" },
+          { unit: 4, en: "cap", cn: "帽子", ipa: "kæp" },
+          { unit: 4, en: "sweater", cn: "毛衣", ipa: "ˈswetə(r)" },
+          { unit: 4, en: "trousers", cn: "裤子", ipa: "ˈtraʊzəz" },
+          { unit: 4, en: "shoes", cn: "鞋子", ipa: "ʃuːz" },
+          { unit: 4, en: "socks", cn: "袜子", ipa: "sɒks" },
+          { unit: 4, en: "size", cn: "尺码", ipa: "saɪz" },
+          { unit: 4, en: "try on", cn: "试穿", ipa: "traɪ ɒn" },
+          { unit: 4, en: "fit", cn: "适合", ipa: "fɪt" },
+          { unit: 4, en: "pound", cn: "英镑", ipa: "paʊnd" },
+          { unit: 4, en: "expensive", cn: "昂贵的", ipa: "ɪkˈspensɪv" },
+          { unit: 4, en: "cheap", cn: "便宜的", ipa: "tʃiːp" },
+          { unit: 5, en: "housework", cn: "家务", ipa: "ˈhaʊswɜːk" },
+          { unit: 5, en: "clean", cn: "打扫", ipa: "kliːn" },
+          { unit: 5, en: "window", cn: "窗户", ipa: "ˈwɪndəʊ" },
+          { unit: 5, en: "wash", cn: "洗", ipa: "wɒʃ" },
+          { unit: 5, en: "clock", cn: "时钟", ipa: "klɒk" },
+          { unit: 5, en: "water", cn: "给……浇水", ipa: "ˈwɔːtə(r)" },
+          { unit: 5, en: "flower", cn: "花", ipa: "ˈflaʊə(r)" },
+          { unit: 5, en: "cook", cn: "烹饪", ipa: "kʊk" },
+          { unit: 5, en: "meal", cn: "一餐", ipa: "miːl" },
+          { unit: 5, en: "set the table", cn: "摆餐具", ipa: "set ðə ˈteɪbl" },
+          { unit: 5, en: "make the bed", cn: "整理床铺", ipa: "meɪk ðə bed" },
+          { unit: 5, en: "dirty", cn: "脏的", ipa: "ˈdɜːti" },
+          { unit: 5, en: "tidy", cn: "整洁的", ipa: "ˈtaɪdi" },
+          { unit: 6, en: "way", cn: "路；方向", ipa: "weɪ" },
+          { unit: 6, en: "street", cn: "街道", ipa: "striːt" },
+          { unit: 6, en: "straight", cn: "笔直地", ipa: "streɪt" },
+          { unit: 6, en: "turn", cn: "转弯", ipa: "tɜːn" },
+          { unit: 6, en: "left", cn: "左边", ipa: "left" },
+          { unit: 6, en: "right", cn: "右边", ipa: "raɪt" },
+          { unit: 6, en: "crossing", cn: "十字路口", ipa: "ˈkrɒsɪŋ" },
+          { unit: 6, en: "traffic lights", cn: "交通灯", ipa: "ˈtræfɪk laɪts" },
+          { unit: 6, en: "museum", cn: "博物馆", ipa: "mjuˈziːəm" },
+          { unit: 6, en: "hospital", cn: "医院", ipa: "ˈhɒspɪtl" },
+          { unit: 6, en: "bookstore", cn: "书店", ipa: "ˈbʊkstɔː(r)" },
+          { unit: 6, en: "cinema", cn: "电影院", ipa: "ˈsɪnəmə" },
+          { unit: 6, en: "post office", cn: "邮局", ipa: "pəʊst ˈɒfɪs" },
+          { unit: 6, en: "library", cn: "图书馆", ipa: "ˈlaɪbrəri" },
+          { unit: 6, en: "bank", cn: "银行", ipa: "bæŋk" },
+          { unit: 6, en: "near", cn: "在……附近", ipa: "nɪə(r)" },
+          { unit: 6, en: "far", cn: "远的", ipa: "fɑː(r)" },
+          { unit: 6, en: "kilometer", cn: "千米；公里", ipa: "kɪˈlɒmɪtə(r)" }
+        ]
+      },
+      {
+        semester: "五年级上册",
+        words: [
+          { unit: 1, en: "wasn't", cn: "不是", ipa: "ˈwɒznt" },
+          { unit: 1, en: "were", cn: "是（are的过去式）", ipa: "wɜː(r)" },
+          { unit: 1, en: "were not", cn: "不是", ipa: "wɜː nɒt" },
+          { unit: 1, en: "ago", cn: "以前", ipa: "əˈɡəʊ" },
+          { unit: 1, en: "metre", cn: "米", ipa: "ˈmiːtə(r)" },
+          { unit: 1, en: "high", cn: "高的", ipa: "haɪ" },
+          { unit: 1, en: "then", cn: "那时", ipa: "ðen" },
+          { unit: 1, en: "fat", cn: "胖的", ipa: "fæt" },
+          { unit: 1, en: "thin", cn: "瘦的", ipa: "θɪn" },
+          { unit: 1, en: "strong", cn: "强壮的", ipa: "strɒŋ" },
+          { unit: 1, en: "could", cn: "能（can的过去式）", ipa: "kʊd" },
+          { unit: 1, en: "go cycling", cn: "骑自行车", ipa: "ɡəʊ ˈsaɪklɪŋ" },
+          { unit: 1, en: "ice-skate", cn: "滑冰", ipa: "ˈaɪs skeɪt" },
+          { unit: 2, en: "cleaned", cn: "打扫（clean的过去式）", ipa: "kliːnd" },
+          { unit: 2, en: "stayed", cn: "停留；待（stay的过去式）", ipa: "steɪd" },
+          { unit: 2, en: "washed", cn: "洗（wash的过去式）", ipa: "wɒʃt" },
+          { unit: 2, en: "watched", cn: "看（watch的过去式）", ipa: "wɒtʃt" },
+          { unit: 2, en: "had", cn: "有；吃（have的过去式）", ipa: "hæd" },
+          { unit: 2, en: "slept", cn: "睡觉（sleep的过去式）", ipa: "slept" },
+          { unit: 2, en: "read", cn: "读（read的过去式）", ipa: "red" },
+          { unit: 2, en: "saw", cn: "看见（see的过去式）", ipa: "sɔː" },
+          { unit: 2, en: "last", cn: "最近的；上一个的", ipa: "lɑːst" },
+          { unit: 2, en: "yesterday", cn: "昨天", ipa: "ˈjestədeɪ" },
+          { unit: 2, en: "before", cn: "在……之前", ipa: "bɪˈfɔː(r)" },
+          { unit: 3, en: "went", cn: "去（go的过去式）", ipa: "went" },
+          { unit: 3, en: "camp", cn: "野营", ipa: "kæmp" },
+          { unit: 3, en: "went camping", cn: "去野营", ipa: "went ˈkæmpɪŋ" },
+          { unit: 3, en: "fish", cn: "钓鱼；鱼", ipa: "fɪʃ" },
+          { unit: 3, en: "went fishing", cn: "去钓鱼", ipa: "went ˈfɪʃɪŋ" },
+          { unit: 3, en: "rode", cn: "骑（ride的过去式）", ipa: "rəʊd" },
+          { unit: 3, en: "hurt", cn: "（使）受伤", ipa: "hɜːt" },
+          { unit: 3, en: "ate", cn: "吃（eat的过去式）", ipa: "et" },
+          { unit: 3, en: "took", cn: "拍照；带（take的过去式）", ipa: "tʊk" },
+          { unit: 3, en: "took pictures", cn: "照相", ipa: "tʊk ˈpɪktʃəz" },
+          { unit: 3, en: "bought", cn: "买（buy的过去式）", ipa: "bɔːt" },
+          { unit: 3, en: "gift", cn: "礼物", ipa: "ɡɪft" },
+          { unit: 3, en: "fell", cn: "摔倒（fall的过去式）", ipa: "fel" },
+          { unit: 3, en: "off", cn: "从（某处）落下", ipa: "ɒf" },
+          { unit: 3, en: " Labour Day", cn: "劳动节", ipa: "ˈleɪbə deɪ" },
+          { unit: 3, en: "mule", cn: "骡子", ipa: "mjuːl" },
+          { unit: 3, en: "couldn't", cn: "不能", ipa: "ˈkʊdnt" },
+          { unit: 3, en: "till", cn: "直到", ipa: "tɪl" },
+          { unit: 4, en: "library", cn: "图书馆", ipa: "ˈlaɪbrəri" },
+          { unit: 4, en: "sunny", cn: "晴朗的", ipa: "ˈsʌni" },
+          { unit: 4, en: "windy", cn: "有风的", ipa: "ˈwɪndi" },
+          { unit: 4, en: "rainy", cn: "下雨的", ipa: "ˈreɪni" },
+          { unit: 4, en: "cloudy", cn: "多云的", ipa: "ˈklaʊdi" },
+          { unit: 4, en: "snowy", cn: "下雪的", ipa: "ˈsnəʊi" },
+          { unit: 4, en: "weather", cn: "天气", ipa: "ˈweðə(r)" },
+          { unit: 4, en: "cold", cn: "冷的", ipa: "kəʊld" },
+          { unit: 4, en: "warm", cn: "暖和的", ipa: "wɔːm" },
+          { unit: 4, en: "cool", cn: "凉爽的", ipa: "kuːl" },
+          { unit: 4, en: "hot", cn: "热的", ipa: "hɒt" },
+          { unit: 4, en: "degree", cn: "度；度数", ipa: "dɪˈɡriː" },
+          { unit: 5, en: "favourite", cn: "特别喜爱的", ipa: "ˈfeɪvərɪt" },
+          { unit: 5, en: "colour", cn: "颜色", ipa: "ˈkʌlə(r)" },
+          { unit: 5, en: "yellow", cn: "黄色（的）", ipa: "ˈjeləʊ" },
+          { unit: 5, en: "green", cn: "绿色（的）", ipa: "ɡriːn" },
+          { unit: 5, en: "red", cn: "红色（的）", ipa: "red" },
+          { unit: 5, en: "blue", cn: "蓝色（的）", ipa: "bluː" },
+          { unit: 5, en: "black", cn: "黑色（的）", ipa: "blæk" },
+          { unit: 5, en: "brown", cn: "棕色（的）", ipa: "braʊn" },
+          { unit: 5, en: "white", cn: "白色（的）", ipa: "waɪt" },
+          { unit: 5, en: "pink", cn: "粉色（的）", ipa: "pɪŋk" },
+          { unit: 5, en: "orange", cn: "橙色（的）", ipa: "ˈɒrɪndʒ" },
+          { unit: 5, en: "purple", cn: "紫色（的）", ipa: "ˈpɜːpl" },
+          { unit: 5, en: "toy", cn: "玩具", ipa: "tɔɪ" },
+          { unit: 5, en: "balloon", cn: "气球", ipa: "bəˈluːn" },
+          { unit: 5, en: "kite", cn: "风筝", ipa: "kaɪt" },
+          { unit: 6, en: "dining hall", cn: "饭厅", ipa: "ˈdaɪnɪŋ hɔːl" },
+          { unit: 6, en: "grass", cn: "草坪", ipa: "ɡrɑːs" },
+          { unit: 6, en: "gym", cn: "体育馆", ipa: "dʒɪm" },
+          { unit: 6, en: "ago", cn: "以前", ipa: "əˈɡəʊ" },
+          { unit: 6, en: "cycling", cn: "骑自行车运动", ipa: "ˈsaɪklɪŋ" },
+          { unit: 6, en: "ice-skate", cn: "滑冰", ipa: "ˈaɪs skeɪt" },
+          { unit: 6, en: "badminton", cn: "羽毛球运动", ipa: "ˈbædmɪntən" },
+          { unit: 6, en: "star", cn: "星", ipa: "stɑː(r)" },
+          { unit: 6, en: "easy", cn: "容易的", ipa: "ˈiːzi" },
+          { unit: 6, en: "look up", cn: "查阅", ipa: "lʊk ʌp" },
+          { unit: 6, en: "Internet", cn: "互联网", ipa: "ˈɪntənet" },
+          { unit: 6, en: "different", cn: "不同的", ipa: "ˈdɪfrənt" },
+          { unit: 6, en: "active", cn: "积极的；活跃的", ipa: "ˈæktɪv" }
+        ]
+      }
     ];
 
-    // 去重：以英文为主键，保留最完整的释义
-    const enMap = new Map();
-    wordData.forEach(w => {
-      if (!enMap.has(w.en)) enMap.set(w.en, w);
-    });
-    const words = Array.from(enMap.values());
+    // 合并为一个扁平词库，用于抽干扰项
+    const allWords = allData.flatMap(s => s.words.map(w => ({ ...w, semester: s.semester })));
 
-    const STORAGE_KEY = "fujian6u_mistakes_v1";
-    const STORAGE_PROGRESS = "fujian6u_progress_v1";
-
-    let mode = "en2cn"; // en2cn | cn2en
-    let selectedUnits = new Set([1,2,3,4,5,6]);
+    // 状态
+    const STORAGE_KEY = "fujian_vocab_v2";
+    let currentSemester = allData[0].semester;
+    let mode = "en2cn";
+    let selectedUnits = new Set();
     let queue = [];
     let index = 0;
     let streak = 0;
@@ -383,6 +484,14 @@
     }
     function saveMistakes() { localStorage.setItem(STORAGE_KEY, JSON.stringify(mistakes)); }
 
+    function getSemesterWords(semester) {
+      return allData.find(s => s.semester === semester)?.words || [];
+    }
+    function getCurrentUnits() {
+      const ws = getSemesterWords(currentSemester);
+      return [...new Set(ws.map(w => w.unit))].sort((a,b) => a-b);
+    }
+
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -391,10 +500,34 @@
       return arr;
     }
 
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2000);
+    }
+
+    function renderSemesterFilters() {
+      const container = document.getElementById("semester-select");
+      const wlContainer = document.getElementById("wordlist-semester-select");
+      const html = allData.map(s => `<button class="${s.semester === currentSemester ? 'active' : ''}" onclick="setSemester('${s.semester.replace(/'/g, "\\'")}')">${s.semester}</button>`).join("");
+      container.innerHTML = html;
+      wlContainer.innerHTML = html;
+    }
+
+    function setSemester(sem) {
+      currentSemester = sem;
+      selectedUnits = new Set(getCurrentUnits());
+      renderSemesterFilters();
+      renderUnitFilters();
+      renderWordList();
+      restartPractice();
+    }
+
     function renderUnitFilters() {
       const container = document.getElementById("unit-filter");
       const wlContainer = document.getElementById("wordlist-unit-filter");
-      const units = [1,2,3,4,5,6];
+      const units = getCurrentUnits();
       const html = units.map(u => `<button class="${selectedUnits.has(u) ? 'active' : ''}" data-unit="${u}" onclick="toggleUnit(${u})">Unit ${u}</button>`).join("");
       container.innerHTML = html;
       wlContainer.innerHTML = html;
@@ -403,6 +536,7 @@
     function toggleUnit(u) {
       if (selectedUnits.has(u)) {
         if (selectedUnits.size > 1) selectedUnits.delete(u);
+        else { showToast("至少选择一个单元"); return; }
       } else selectedUnits.add(u);
       renderUnitFilters();
       restartPractice();
@@ -417,7 +551,7 @@
     }
 
     function buildQueue() {
-      const pool = words.filter(w => selectedUnits.has(w.unit));
+      const pool = getSemesterWords(currentSemester).filter(w => selectedUnits.has(w.unit));
       queue = shuffle(pool.map((w, i) => ({ ...w, originalIndex: i })));
       index = 0;
       streak = 0;
@@ -432,13 +566,34 @@
       document.getElementById("progress-fill").style.width = pct + "%";
     }
 
+    // 发音：优先系统语音，否则在线音频
+    let audio = new Audio();
     function speak(text) {
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-GB";
-      u.rate = 0.9;
-      window.speechSynthesis.speak(u);
+      if (!text) return;
+      // 1. 尝试 Web Speech API
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-GB";
+        u.rate = 0.9;
+        // 尽量选英式男/女声
+        const voices = window.speechSynthesis.getVoices();
+        const enVoice = voices.find(v => v.lang === "en-GB") || voices.find(v => v.lang.startsWith("en"));
+        if (enVoice) u.voice = enVoice;
+        window.speechSynthesis.speak(u);
+      }
+      // 2. 同时播放在线音频作为 fallback / 增强
+      try {
+        audio.pause();
+        audio.src = "https://dict.youdao.com/dictvoice?type=1&audio=" + encodeURIComponent(text);
+        audio.play().catch(() => {});
+      } catch {}
+    }
+
+    // 确保语音列表加载完成
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => {};
+      window.speechSynthesis.getVoices();
     }
 
     function renderQuestion() {
@@ -454,10 +609,12 @@
       document.getElementById("feedback").textContent = "";
       document.getElementById("feedback").className = "feedback";
       document.getElementById("next-btn").classList.add("hidden");
+      document.getElementById("next-btn").textContent = "下一题";
 
-      // 选项生成
       const correct = mode === "en2cn" ? q.cn : q.en;
-      const others = words.filter(w => w.en !== q.en).map(w => mode === "en2cn" ? w.cn : w.en);
+      const others = getSemesterWords(currentSemester)
+        .filter(w => w.en !== q.en)
+        .map(w => mode === "en2cn" ? w.cn : w.en);
       const distractors = shuffle(others).slice(0, 3);
       const opts = shuffle([correct, ...distractors]);
 
@@ -471,9 +628,7 @@
         optsEl.appendChild(btn);
       });
 
-      // 自动发音
       if (mode === "en2cn") speak(q.en);
-
       document.getElementById("audio-btn").onclick = () => speak(q.en);
       updateStats();
     }
@@ -503,7 +658,6 @@
         streak = 0;
         document.getElementById("feedback").textContent = "回答错误，请重新选择";
         document.getElementById("feedback").className = "feedback wrong";
-        // 记录错题
         addMistake(q);
         setTimeout(() => {
           btn.classList.remove("wrong");
@@ -516,9 +670,9 @@
     }
 
     function addMistake(q) {
-      const exists = mistakes.find(m => m.en === q.en && m.mode === mode);
+      const exists = mistakes.find(m => m.en === q.en && m.mode === mode && m.semester === currentSemester);
       if (!exists) {
-        mistakes.unshift({ en: q.en, cn: q.cn, ipa: q.ipa, unit: q.unit, mode, date: new Date().toISOString() });
+        mistakes.unshift({ en: q.en, cn: q.cn, ipa: q.ipa, unit: q.unit, semester: currentSemester, mode, date: new Date().toISOString() });
         saveMistakes();
         renderMistakes();
       }
@@ -548,7 +702,7 @@
 
     function renderWordList() {
       const list = document.getElementById("word-list");
-      const filtered = words.filter(w => selectedUnits.has(w.unit));
+      const filtered = getSemesterWords(currentSemester).filter(w => selectedUnits.has(w.unit));
       list.innerHTML = filtered.map(w => `
         <div class="word-item">
           <div>
@@ -579,6 +733,7 @@
             </div>
             <div class="cn">${m.cn}</div>
             <div style="margin-top:6px">
+              <span class="tag">${m.semester}</span>
               <span class="tag">${m.mode === "en2cn" ? "英译汉" : "汉译英"}</span>
               <span class="tag">Unit ${m.unit}</span>
             </div>
@@ -589,16 +744,21 @@
 
     function startRetest() {
       if (!mistakes.length) return;
-      // 用错题生成队列
-      selectedUnits = new Set([1,2,3,4,5,6]);
-      renderUnitFilters();
-      queue = shuffle(mistakes.map(m => words.find(w => w.en === m.en) || m));
-      index = 0;
-      streak = 0;
-      answered = false;
+      const pool = mistakes.map(m => {
+        const found = allWords.find(w => w.en === m.en && w.semester === m.semester);
+        return found || m;
+      });
+      currentSemester = mistakes[0].semester;
+      selectedUnits = new Set(getCurrentUnits());
       mode = "en2cn";
       document.getElementById("mode-en2cn").classList.add("active");
       document.getElementById("mode-cn2en").classList.remove("active");
+      renderSemesterFilters();
+      renderUnitFilters();
+      queue = shuffle(pool);
+      index = 0;
+      streak = 0;
+      answered = false;
       showPage("practice");
       renderQuestion();
     }
@@ -620,6 +780,8 @@
 
     // 初始化
     loadMistakes();
+    selectedUnits = new Set(getCurrentUnits());
+    renderSemesterFilters();
     renderUnitFilters();
     restartPractice();
     renderMistakes();

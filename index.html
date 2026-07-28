@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>闽教版六年级上册英语单词</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --success: #10B981;
+      --danger: #EF4444;
+      --bg: #F3F4F6;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+    header nav button {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    header nav button.active { background: #fff; color: var(--primary); }
+    main { flex: 1; overflow-y: auto; padding: 16px; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .stats { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+    .question-box { text-align: center; margin-bottom: 20px; }
+    .direction { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+    .prompt {
+      font-size: 28px;
+      font-weight: 700;
+      word-break: break-word;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .prompt-sub { font-size: 14px; color: var(--muted); }
+    .audio-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--primary);
+    }
+    .options { display: grid; gap: 12px; }
+    .option {
+      background: #F9FAFB;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+      display: flex;
+      align-items: center;
+    }
+    .option:active { transform: scale(0.98); }
+    .option:hover { border-color: #C7D2FE; background: #EEF2FF; }
+    .option.correct { border-color: var(--success); background: #D1FAE5; color: #065F46; }
+    .option.wrong { border-color: var(--danger); background: #FEE2E2; color: #991B1B; }
+    .option.disabled { pointer-events: none; }
+    .feedback {
+      text-align: center;
+      margin-top: 14px;
+      font-weight: 600;
+      min-height: 22px;
+    }
+    .feedback.correct { color: var(--success); }
+    .feedback.wrong { color: var(--danger); }
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .word-list { display: grid; gap: 10px; }
+    .word-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .word-item .en { font-weight: 600; font-size: 16px; }
+    .word-item .cn { color: var(--muted); font-size: 14px; text-align: right; }
+    .mistake-row {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .mistake-row .top { display: flex; justify-content: space-between; align-items: center; }
+    .mistake-row .en { font-weight: 700; font-size: 17px; }
+    .mistake-row .cn { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .mistake-row .date { font-size: 12px; color: var(--muted); }
+    .tag {
+      display: inline-block;
+      background: #E0E7FF;
+      color: var(--primary);
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-right: 6px;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 0;
+    }
+    .mode-select { display: flex; gap: 10px; margin-bottom: 16px; }
+    .mode-select button { flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border); background: #fff; cursor: pointer; font-size: 15px; }
+    .mode-select button.active { border-color: var(--primary); background: #EEF2FF; color: var(--primary); font-weight: 600; }
+    .unit-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .unit-filter button { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--border); background: #fff; font-size: 13px; cursor: pointer; }
+    .unit-filter button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .hidden { display: none !important; }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>闽教版六上英语单词</h1>
+    <nav>
+      <button id="nav-practice" class="active" onclick="showPage('practice')">背词</button>
+      <button id="nav-wordlist" onclick="showPage('wordlist')">词表</button>
+      <button id="nav-mistakes" onclick="showPage('mistakes')">错题</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 练习页 -->
+    <section id="page-practice">
+      <div class="card">
+        <div class="mode-select">
+          <button id="mode-en2cn" class="active" onclick="setMode('en2cn')">英译汉</button>
+          <button id="mode-cn2en" onclick="setMode('cn2en')">汉译英</button>
+        </div>
+        <div class="unit-filter" id="unit-filter"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="stats">
+          <span id="stat-progress">进度 0/0</span>
+          <span id="stat-streak">连对 0</span>
+        </div>
+        <div class="question-box">
+          <div class="direction" id="direction">请选择正确的中文释义</div>
+          <div class="prompt" id="prompt"></div>
+          <button class="audio-btn" id="audio-btn" title="英式发音">🔊</button>
+          <div class="prompt-sub" id="prompt-sub"></div>
+        </div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <button class="btn-primary hidden" id="next-btn" onclick="nextQuestion()">下一题</button>
+      </div>
+      <button class="btn-secondary" onclick="restartPractice()">重新开始</button>
+    </section>
+
+    <!-- 词表页 -->
+    <section id="page-wordlist" class="hidden">
+      <div class="card">
+        <div class="section-title">全部单词</div>
+        <div class="unit-filter" id="wordlist-unit-filter"></div>
+        <div class="word-list" id="word-list"></div>
+      </div>
+    </section>
+
+    <!-- 错题页 -->
+    <section id="page-mistakes" class="hidden">
+      <div class="card">
+        <div class="section-title">错题整理</div>
+        <div id="mistake-list"></div>
+        <button class="btn-primary" id="retest-btn" onclick="startRetest()">重测错题</button>
+        <button class="btn-secondary" onclick="clearMistakes()">清空错题</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>本地背单词 · 数据保存在浏览器中</footer>
+
+  <script>
+    // 闽教版六年级上册单词数据
+    const wordData = [
+      // Unit 1 The Olympic Games
+      { unit: 1, en: "Olympic", cn: "奥林匹克运动会的", ipa: "əˈlɪmpɪk" },
+      { unit: 1, en: "game", cn: "游戏；比赛", ipa: "ɡeɪm" },
+      { unit: 1, en: "Olympic Games", cn: "奥林匹克运动会", ipa: "əˈlɪmpɪk ɡeɪmz" },
+      { unit: 1, en: "take place", cn: "举行", ipa: "teɪk pleɪs" },
+      { unit: 1, en: "Summer Olympics", cn: "夏季奥运会", ipa: "ˈsʌmə əˈlɪmpɪks" },
+      { unit: 1, en: "Winter Olympics", cn: "冬季奥运会", ipa: "ˈwɪntə əˈlɪmpɪks" },
+      { unit: 1, en: "ring", cn: "环", ipa: "rɪŋ" },
+      { unit: 1, en: "Olympic Flag", cn: "奥运会旗", ipa: "əˈlɪmpɪk flæɡ" },
+      { unit: 1, en: "answer", cn: "回答", ipa: "ˈɑːnsə(r)" },
+      { unit: 1, en: "hold", cn: "举办", ipa: "həʊld" },
+      { unit: 1, en: "something", cn: "某事物", ipa: "ˈsʌmθɪŋ" },
+      { unit: 1, en: "began", cn: "开始（begin的过去式）", ipa: "bɪˈɡæn" },
+      { unit: 1, en: "slogan", cn: "口号", ipa: "ˈsləʊɡən" },
+      { unit: 1, en: "world", cn: "世界", ipa: "wɜːld" },
+      { unit: 1, en: "dream", cn: "梦想", ipa: "driːm" },
+      { unit: 1, en: "strong", cn: "强壮的", ipa: "strɒŋ" },
+      { unit: 1, en: "together", cn: "一起", ipa: "təˈɡeðə(r)" },
+
+      // Unit 2 Physical Exercises
+      { unit: 2, en: "between", cn: "在……（两者）之间", ipa: "bɪˈtwiːn" },
+      { unit: 2, en: "woman", cn: "妇女（复数women）", ipa: "ˈwʊmən" },
+      { unit: 2, en: "healthy", cn: "健康的", ipa: "ˈhelθi" },
+      { unit: 2, en: "exercise", cn: "锻炼", ipa: "ˈeksəsaɪz" },
+      { unit: 2, en: "always", cn: "总是", ipa: "ˈɔːlweɪz" },
+      { unit: 2, en: "often", cn: "经常", ipa: "ˈɒfn" },
+      { unit: 2, en: "sometimes", cn: "有时", ipa: "ˈsʌmtaɪmz" },
+      { unit: 2, en: "pass", cn: "传递", ipa: "pɑːs" },
+      { unit: 2, en: "ball", cn: "球", ipa: "bɔːl" },
+      { unit: 2, en: "catch", cn: "接住", ipa: "kætʃ" },
+      { unit: 2, en: "cry", cn: "喊叫", ipa: "kraɪ" },
+      { unit: 2, en: "cheer", cn: "欢呼", ipa: "tʃɪə(r)" },
+      { unit: 2, en: "their", cn: "他们的", ipa: "ðeə(r)" },
+      { unit: 2, en: "team", cn: "（体育的）队", ipa: "tiːm" },
+
+      // Unit 3 Food and Health
+      { unit: 3, en: "bring", cn: "带来", ipa: "brɪŋ" },
+      { unit: 3, en: "basket", cn: "篮子", ipa: "ˈbɑːskɪt" },
+      { unit: 3, en: "candy", cn: "糖果", ipa: "ˈkændi" },
+      { unit: 3, en: "bad", cn: "坏的", ipa: "bæd" },
+      { unit: 3, en: "teeth", cn: "牙齿（单数tooth）", ipa: "tiːθ" },
+      { unit: 3, en: "keep", cn: "保持", ipa: "kiːp" },
+      { unit: 3, en: "body", cn: "身体", ipa: "ˈbɒdi" },
+      { unit: 3, en: "menu", cn: "菜单", ipa: "ˈmenjuː" },
+      { unit: 3, en: "delicious", cn: "美味的", ipa: "dɪˈlɪʃəs" },
+      { unit: 3, en: "any", cn: "任何的；任何一个", ipa: "ˈeni" },
+      { unit: 3, en: "problem", cn: "问题", ipa: "ˈprɒbləm" },
+      { unit: 3, en: "salad", cn: "色拉", ipa: "ˈsæləd" },
+
+      // Unit 4 Buying New Clothes
+      { unit: 4, en: "daughter", cn: "女儿", ipa: "ˈdɔːtə(r)" },
+      { unit: 4, en: "son", cn: "儿子", ipa: "sʌn" },
+      { unit: 4, en: "clothes", cn: "衣服", ipa: "kləʊðz" },
+      { unit: 4, en: "shirt", cn: "衬衫", ipa: "ʃɜːt" },
+      { unit: 4, en: "shorts", cn: "短裤", ipa: "ʃɔːts" },
+      { unit: 4, en: "cap", cn: "帽子", ipa: "kæp" },
+      { unit: 4, en: "sweater", cn: "毛衣", ipa: "ˈswetə(r)" },
+      { unit: 4, en: "trousers", cn: "裤子", ipa: "ˈtraʊzəz" },
+      { unit: 4, en: "shoes", cn: "鞋子", ipa: "ʃuːz" },
+      { unit: 4, en: "socks", cn: "袜子", ipa: "sɒks" },
+      { unit: 4, en: "size", cn: "尺码", ipa: "saɪz" },
+      { unit: 4, en: "try on", cn: "试穿", ipa: "traɪ ɒn" },
+      { unit: 4, en: "fit", cn: "适合", ipa: "fɪt" },
+      { unit: 4, en: "pound", cn: "英镑", ipa: "paʊnd" },
+      { unit: 4, en: "expensive", cn: "昂贵的", ipa: "ɪkˈspensɪv" },
+      { unit: 4, en: "cheap", cn: "便宜的", ipa: "tʃiːp" },
+
+      // Unit 5 Housework
+      { unit: 5, en: "housework", cn: "家务", ipa: "ˈhaʊswɜːk" },
+      { unit: 5, en: "clean", cn: "打扫", ipa: "kliːn" },
+      { unit: 5, en: "window", cn: "窗户", ipa: "ˈwɪndəʊ" },
+      { unit: 5, en: "wash", cn: "洗", ipa: "wɒʃ" },
+      { unit: 5, en: "clock", cn: "时钟", ipa: "klɒk" },
+      { unit: 5, en: "water", cn: "给……浇水", ipa: "ˈwɔːtə(r)" },
+      { unit: 5, en: "flower", cn: "花", ipa: "ˈflaʊə(r)" },
+      { unit: 5, en: "cook", cn: "烹饪", ipa: "kʊk" },
+      { unit: 5, en: "meal", cn: "一餐", ipa: "miːl" },
+      { unit: 5, en: "set the table", cn: "摆餐具", ipa: "set ðə ˈteɪbl" },
+      { unit: 5, en: "make the bed", cn: "整理床铺", ipa: "meɪk ðə bed" },
+      { unit: 5, en: "dirty", cn: "脏的", ipa: "ˈdɜːti" },
+      { unit: 5, en: "tidy", cn: "整洁的", ipa: "ˈtaɪdi" },
+
+      // Unit 6 Asking the Way
+      { unit: 6, en: "way", cn: "路；方向", ipa: "weɪ" },
+      { unit: 6, en: "street", cn: "街道", ipa: "striːt" },
+      { unit: 6, en: "straight", cn: "笔直地", ipa: "streɪt" },
+      { unit: 6, en: "turn", cn: "转弯", ipa: "tɜːn" },
+      { unit: 6, en: "left", cn: "左边", ipa: "left" },
+      { unit: 6, en: "right", cn: "右边", ipa: "raɪt" },
+      { unit: 6, en: "crossing", cn: "十字路口", ipa: "ˈkrɒsɪŋ" },
+      { unit: 6, en: " traffic lights", cn: "交通灯", ipa: "ˈtræfɪk laɪts" },
+      { unit: 6, en: "museum", cn: "博物馆", ipa: "mjuˈziːəm" },
+      { unit: 6, en: "hospital", cn: "医院", ipa: "ˈhɒspɪtl" },
+      { unit: 6, en: "bookstore", cn: "书店", ipa: "ˈbʊkstɔː(r)" },
+      { unit: 6, en: "cinema", cn: "电影院", ipa: "ˈsɪnəmə" },
+      { unit: 6, en: "post office", cn: "邮局", ipa: "pəʊst ˈɒfɪs" },
+      { unit: 6, en: "library", cn: "图书馆", ipa: "ˈlaɪbrəri" },
+      { unit: 6, en: "bank", cn: "银行", ipa: "bæŋk" },
+      { unit: 6, en: "near", cn: "在……附近", ipa: "nɪə(r)" },
+      { unit: 6, en: "far", cn: "远的", ipa: "fɑː(r)" },
+      { unit: 6, en: " kilometer", cn: "千米；公里", ipa: "kɪˈlɒmɪtə(r)" }
+    ];
+
+    // 去重：以英文为主键，保留最完整的释义
+    const enMap = new Map();
+    wordData.forEach(w => {
+      if (!enMap.has(w.en)) enMap.set(w.en, w);
+    });
+    const words = Array.from(enMap.values());
+
+    const STORAGE_KEY = "fujian6u_mistakes_v1";
+    const STORAGE_PROGRESS = "fujian6u_progress_v1";
+
+    let mode = "en2cn"; // en2cn | cn2en
+    let selectedUnits = new Set([1,2,3,4,5,6]);
+    let queue = [];
+    let index = 0;
+    let streak = 0;
+    let currentQuestion = null;
+    let answered = false;
+    let mistakes = [];
+
+    function loadMistakes() {
+      try { mistakes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { mistakes = []; }
+    }
+    function saveMistakes() { localStorage.setItem(STORAGE_KEY, JSON.stringify(mistakes)); }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function renderUnitFilters() {
+      const container = document.getElementById("unit-filter");
+      const wlContainer = document.getElementById("wordlist-unit-filter");
+      const units = [1,2,3,4,5,6];
+      const html = units.map(u => `<button class="${selectedUnits.has(u) ? 'active' : ''}" data-unit="${u}" onclick="toggleUnit(${u})">Unit ${u}</button>`).join("");
+      container.innerHTML = html;
+      wlContainer.innerHTML = html;
+    }
+
+    function toggleUnit(u) {
+      if (selectedUnits.has(u)) {
+        if (selectedUnits.size > 1) selectedUnits.delete(u);
+      } else selectedUnits.add(u);
+      renderUnitFilters();
+      restartPractice();
+      renderWordList();
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById("mode-en2cn").classList.toggle("active", m === "en2cn");
+      document.getElementById("mode-cn2en").classList.toggle("active", m === "cn2en");
+      restartPractice();
+    }
+
+    function buildQueue() {
+      const pool = words.filter(w => selectedUnits.has(w.unit));
+      queue = shuffle(pool.map((w, i) => ({ ...w, originalIndex: i })));
+      index = 0;
+      streak = 0;
+      answered = false;
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById("stat-progress").textContent = `进度 ${Math.min(index + (answered ? 1 : 0), queue.length)}/${queue.length}`;
+      document.getElementById("stat-streak").textContent = `连对 ${streak}`;
+      const pct = queue.length ? ((index + (answered ? 1 : 0)) / queue.length * 100) : 0;
+      document.getElementById("progress-fill").style.width = pct + "%";
+    }
+
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-GB";
+      u.rate = 0.9;
+      window.speechSynthesis.speak(u);
+    }
+
+    function renderQuestion() {
+      answered = false;
+      currentQuestion = queue[index];
+      const q = currentQuestion;
+      const direction = mode === "en2cn" ? "请选择正确的中文释义" : "请选择正确的英文单词/词组";
+      const prompt = mode === "en2cn" ? q.en : q.cn;
+      const sub = mode === "en2cn" ? `/${q.ipa}/` : "";
+      document.getElementById("direction").textContent = direction;
+      document.getElementById("prompt").textContent = prompt;
+      document.getElementById("prompt-sub").textContent = sub;
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("feedback").className = "feedback";
+      document.getElementById("next-btn").classList.add("hidden");
+
+      // 选项生成
+      const correct = mode === "en2cn" ? q.cn : q.en;
+      const others = words.filter(w => w.en !== q.en).map(w => mode === "en2cn" ? w.cn : w.en);
+      const distractors = shuffle(others).slice(0, 3);
+      const opts = shuffle([correct, ...distractors]);
+
+      const optsEl = document.getElementById("options");
+      optsEl.innerHTML = "";
+      opts.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = opt;
+        btn.onclick = () => handleAnswer(opt, btn);
+        optsEl.appendChild(btn);
+      });
+
+      // 自动发音
+      if (mode === "en2cn") speak(q.en);
+
+      document.getElementById("audio-btn").onclick = () => speak(q.en);
+      updateStats();
+    }
+
+    function handleAnswer(selected, btn) {
+      if (answered) return;
+      const q = currentQuestion;
+      const correct = mode === "en2cn" ? q.cn : q.en;
+      const allBtns = document.querySelectorAll(".option");
+      allBtns.forEach(b => b.classList.add("disabled"));
+
+      if (selected === correct) {
+        answered = true;
+        btn.classList.add("correct");
+        streak++;
+        document.getElementById("feedback").textContent = "回答正确！";
+        document.getElementById("feedback").className = "feedback correct";
+        if (mode === "cn2en") speak(q.en);
+        if (index < queue.length - 1) {
+          document.getElementById("next-btn").classList.remove("hidden");
+        } else {
+          document.getElementById("next-btn").textContent = "完成练习";
+          document.getElementById("next-btn").classList.remove("hidden");
+        }
+      } else {
+        btn.classList.add("wrong");
+        streak = 0;
+        document.getElementById("feedback").textContent = "回答错误，请重新选择";
+        document.getElementById("feedback").className = "feedback wrong";
+        // 记录错题
+        addMistake(q);
+        setTimeout(() => {
+          btn.classList.remove("wrong");
+          allBtns.forEach(b => {
+            if (!b.classList.contains("correct")) b.classList.remove("disabled");
+          });
+        }, 500);
+      }
+      updateStats();
+    }
+
+    function addMistake(q) {
+      const exists = mistakes.find(m => m.en === q.en && m.mode === mode);
+      if (!exists) {
+        mistakes.unshift({ en: q.en, cn: q.cn, ipa: q.ipa, unit: q.unit, mode, date: new Date().toISOString() });
+        saveMistakes();
+        renderMistakes();
+      }
+    }
+
+    function nextQuestion() {
+      if (index < queue.length - 1) {
+        index++;
+        renderQuestion();
+      } else {
+        document.getElementById("feedback").textContent = "本组练习完成！";
+        document.getElementById("feedback").className = "feedback correct";
+        document.getElementById("next-btn").classList.add("hidden");
+      }
+    }
+
+    function restartPractice() {
+      buildQueue();
+      document.getElementById("next-btn").textContent = "下一题";
+      if (queue.length) renderQuestion();
+      else {
+        document.getElementById("prompt").textContent = "";
+        document.getElementById("prompt-sub").textContent = "";
+        document.getElementById("options").innerHTML = "<div class='empty'>请选择至少一个单元</div>";
+      }
+    }
+
+    function renderWordList() {
+      const list = document.getElementById("word-list");
+      const filtered = words.filter(w => selectedUnits.has(w.unit));
+      list.innerHTML = filtered.map(w => `
+        <div class="word-item">
+          <div>
+            <div class="en">${w.en} <span class="tag">Unit ${w.unit}</span></div>
+            <div style="font-size:12px;color:var(--muted)">/${w.ipa}/</div>
+          </div>
+          <div class="cn">${w.cn}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderMistakes() {
+      const list = document.getElementById("mistake-list");
+      if (!mistakes.length) {
+        list.innerHTML = "<div class='empty'>暂无错题，继续加油！</div>";
+        document.getElementById("retest-btn").classList.add("hidden");
+        return;
+      }
+      document.getElementById("retest-btn").classList.remove("hidden");
+      list.innerHTML = mistakes.map(m => {
+        const d = new Date(m.date);
+        const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+        return `
+          <div class="mistake-row">
+            <div class="top">
+              <span class="en">${m.en}</span>
+              <span class="date">${dateStr}</span>
+            </div>
+            <div class="cn">${m.cn}</div>
+            <div style="margin-top:6px">
+              <span class="tag">${m.mode === "en2cn" ? "英译汉" : "汉译英"}</span>
+              <span class="tag">Unit ${m.unit}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function startRetest() {
+      if (!mistakes.length) return;
+      // 用错题生成队列
+      selectedUnits = new Set([1,2,3,4,5,6]);
+      renderUnitFilters();
+      queue = shuffle(mistakes.map(m => words.find(w => w.en === m.en) || m));
+      index = 0;
+      streak = 0;
+      answered = false;
+      mode = "en2cn";
+      document.getElementById("mode-en2cn").classList.add("active");
+      document.getElementById("mode-cn2en").classList.remove("active");
+      showPage("practice");
+      renderQuestion();
+    }
+
+    function clearMistakes() {
+      if (!confirm("确定清空所有错题吗？")) return;
+      mistakes = [];
+      saveMistakes();
+      renderMistakes();
+    }
+
+    function showPage(page) {
+      ["practice","wordlist","mistakes"].forEach(p => document.getElementById("page-"+p).classList.add("hidden"));
+      document.getElementById("page-"+page).classList.remove("hidden");
+      ["practice","wordlist","mistakes"].forEach(p => document.getElementById("nav-"+p).classList.toggle("active", p === page));
+      if (page === "wordlist") renderWordList();
+      if (page === "mistakes") renderMistakes();
+    }
+
+    // 初始化
+    loadMistakes();
+    renderUnitFilters();
+    restartPractice();
+    renderMistakes();
+  </script>
+</body>
+</html>

@@ -5309,7 +5309,7 @@ const allData = [
   }
 ];
 
-，用于抽干扰项
+    // 用于抽干扰项
     const allWords = allData.flatMap(s => s.words.map(w => ({ ...w, semester: s.semester })));
 
     // 状态

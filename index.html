@@ -155,10 +155,13 @@
       padding: 12px 14px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
     }
+    .word-item .left { flex: 1; }
+    .word-item .right { text-align: right; max-width: 55%; }
     .word-item .en { font-weight: 600; font-size: 16px; }
-    .word-item .cn { color: var(--muted); font-size: 14px; text-align: right; }
+    .word-item .cn { color: var(--muted); font-size: 14px; }
+    .word-item .ipa { font-size: 12px; color: var(--muted); margin-top: 4px; }
     .mistake-row {
       background: #fff;
       border: 1px solid var(--border);
@@ -211,18 +214,6 @@
       pointer-events: none;
     }
     .toast.show { opacity: 1; }
-  
-    .ipa-line { font-size: 14px; color: var(--muted); margin-top: 4px; }
-    .word-item { align-items: flex-start; }
-    .word-item .left { flex: 1; }
-    .word-item .right { text-align: right; max-width: 55%; }
-
-  
-    .ipa-line { font-size: 14px; color: var(--muted); margin-top: 4px; }
-    .word-item { align-items: flex-start; }
-    .word-item .left { flex: 1; }
-    .word-item .right { text-align: right; max-width: 55%; }
-
   </style>
 </head>
 <body>
@@ -236,7 +227,6 @@
   </header>
 
   <main>
-    <!-- 练习页 -->
     <section id="page-practice">
       <div class="card">
         <div class="section-title" style="font-size:15px;color:var(--muted);font-weight:500;margin-bottom:8px">选择学期</div>
@@ -254,7 +244,7 @@
         <div class="question-box">
           <div class="direction" id="direction">请选择正确的中文释义</div>
           <div class="prompt" id="prompt"></div>
-          <button class="audio-btn" id="audio-btn" title="英式发音">🔊</button>
+          <button class="audio-btn" id="audio-btn" title="发音">🔊</button>
           <div class="prompt-sub" id="prompt-sub"></div>
         </div>
         <div class="options" id="options"></div>
@@ -264,7 +254,6 @@
       <button class="btn-secondary" onclick="restartPractice()">重新开始</button>
     </section>
 
-    <!-- 词表页 -->
     <section id="page-wordlist" class="hidden">
       <div class="card">
         <div class="section-title">全部单词</div>
@@ -274,7 +263,6 @@
       </div>
     </section>
 
-    <!-- 错题页 -->
     <section id="page-mistakes" class="hidden">
       <div class="card">
         <div class="section-title">错题整理</div>
@@ -285,3599 +273,1260 @@
     </section>
   </main>
 
-  <footer>本地背单词 · 数据保存在浏览器中</footer>
+  <footer>闽教版小学英语背单词</footer>
   <div class="toast" id="toast"></div>
 
   <script>
     // ================= 单词数据 =================
-const allData = [
-  {
-    "semester": "六年级上册",
-    "words": [
-      {
-        "unit": 1,
-        "en": "event",
-        "cn": "事件；赛事",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "member",
-        "cn": "成员",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "skill",
-        "cn": "技能；技巧",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "Olympic",
-        "cn": "奥林匹克运动会的",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "Olympics",
-        "cn": "奥林匹克运动会",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "host",
-        "cn": "主人；主办",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "began",
-        "cn": "（begin的过去式）开始",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "answer",
-        "cn": "回答",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "slogan",
-        "cn": "口号；标语",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "were",
-        "cn": "（are的过去式）是",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "popular",
-        "cn": "受欢迎的",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "exciting",
-        "cn": "令人兴奋的",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "future",
-        "cn": "将来",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "was",
-        "cn": "（is的过去式）是",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "medal",
-        "cn": "奖牌",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "won",
-        "cn": "（win的过去式）获胜；赢",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "gold",
-        "cn": "金；金色",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "silver",
-        "cn": "银；银色",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "bronze",
-        "cn": "青铜；青铜色",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "national",
-        "cn": "国家的",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "fitness",
-        "cn": "健壮；健康",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "logo",
-        "cn": "标志；标识",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "second",
-        "cn": "第二；第二的",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "hiking",
-        "cn": "徒步旅行",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "menu",
-        "cn": "菜单",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "matter",
-        "cn": "事情；情况",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "ill",
-        "cn": "生病的；不适的",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "bad",
-        "cn": "坏的",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "well",
-        "cn": "良好的；健康的",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "headache",
-        "cn": "头疼",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "maybe",
-        "cn": "也许；可能",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "fever",
-        "cn": "发烧",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "check",
-        "cn": "检查；核实",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "medicine",
-        "cn": "药；医学",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "health",
-        "cn": "健康",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "always",
-        "cn": "总是；每次都",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "fan",
-        "cn": "迷；爱好者",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "tip",
-        "cn": "建议",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "hour",
-        "cn": "小时",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "habit",
-        "cn": "习惯",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "tidy",
-        "cn": "整洁的；有序的",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "fourth",
-        "cn": "第四；第四的",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "manner",
-        "cn": "礼貌；礼仪",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "yourself",
-        "cn": "你自己",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "cup",
-        "cn": "杯子",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "pleasure",
-        "cn": "愉快；快乐",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "bedroom",
-        "cn": "卧室",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "borrow",
-        "cn": "借；借用",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "sure",
-        "cn": "当然",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "carefully",
-        "cn": "小心地",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "mess",
-        "cn": "混乱；凌乱",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "public",
-        "cn": "公众；公共的",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "swing",
-        "cn": "秋千",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "off",
-        "cn": "从……去掉；离开",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "ouch",
-        "cn": "哎哟",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "feed",
-        "cn": "喂养；饲养",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "greet",
-        "cn": "问候；招呼",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "did",
-        "cn": "（do的过去式）做；干",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "meal",
-        "cn": "一餐；饭",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "round",
-        "cn": "圆形的",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "dining table",
-        "cn": "餐桌",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "easily",
-        "cn": "容易地",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "guest",
-        "cn": "客人",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "plate",
-        "cn": "盘；碟",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "bowl",
-        "cn": "碗",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "spoon",
-        "cn": "勺；匙",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "chopstick",
-        "cn": "筷子",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "dish",
-        "cn": "菜肴",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "middle",
-        "cn": "中间；中间的",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "polite",
-        "cn": "礼貌的",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "drum",
-        "cn": "鼓",
-        "ipa": ""
-      },
-      {
-        "unit": 3,
-        "en": "finish",
-        "cn": "完成",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "hardworking",
-        "cn": "努力的；勤劳的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "country",
-        "cn": "国家",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "soldier",
-        "cn": "士兵；军人",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "research",
-        "cn": "研究；调查",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "develop",
-        "cn": "（使）发展；（使）成长",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "satellite",
-        "cn": "人造卫星",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "aerospace",
-        "cn": "航空航天",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "physicist",
-        "cn": "物理学家",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "invention",
-        "cn": "发明；创造",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "inventor",
-        "cn": "发明者；发明家",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "smart",
-        "cn": "聪明的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "American",
-        "cn": "美国的；美国人",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "invent",
-        "cn": "发明；创造",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "prize",
-        "cn": "奖品；奖赏",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "field",
-        "cn": "学科；领域",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "physics",
-        "cn": "物理",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "chemistry",
-        "cn": "化学",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "born",
-        "cn": "出生",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "traditional",
-        "cn": "传统的；习俗的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "education",
-        "cn": "教育",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "free",
-        "cn": "免费的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "everyone",
-        "cn": "每个人",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "primary",
-        "cn": "首要的；初级的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "uniform",
-        "cn": "制服",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "most",
-        "cn": "最；最多",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "delivery",
-        "cn": "递送；投递",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "bring",
-        "cn": "带来",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "ordinary",
-        "cn": "普通的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "think",
-        "cn": "认为",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "achievement",
-        "cn": "完成；达到；成就",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "across",
-        "cn": "穿过；越过",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "advice",
-        "cn": "忠告；建议",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "aha",
-        "cn": "啊哈",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "along",
-        "cn": "沿着",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "Asian",
-        "cn": "亚洲",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "Australia",
-        "cn": "澳大利亚",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "base",
-        "cn": "基础；根据",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "bedtime",
-        "cn": "就寝时间",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "bill",
-        "cn": "账单",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "birthplace",
-        "cn": "出生地",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "bottle",
-        "cn": "瓶子",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "brave",
-        "cn": "勇敢的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "brush",
-        "cn": "刷；刷语",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "candy",
-        "cn": "糖果",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "center",
-        "cn": "中心",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "clever",
-        "cn": "聪明的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "cola",
-        "cn": "可乐",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "cream",
-        "cn": "奶油",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "cry",
-        "cn": "哭；呼喊",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "diary",
-        "cn": "日记",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "done",
-        "cn": "（do的过去分词）做；干",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "drew",
-        "cn": "（draw的过去式）画；绘画",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "drive",
-        "cn": "开车；驾驶",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "duty",
-        "cn": "义务；责任",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "easier",
-        "cn": "（easy的比较级）容易的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "flag",
-        "cn": "旗；旗帜",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "Florence",
-        "cn": "佛罗伦萨",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "fork",
-        "cn": "叉子",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "heart",
-        "cn": "心；心脏",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "held",
-        "cn": "（hold的过去式）举办",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "illness",
-        "cn": "病；疾病",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "important",
-        "cn": "重要的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "international",
-        "cn": "国际的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "invite",
-        "cn": "邀请",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "Italy",
-        "cn": "意大利",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "juicy",
-        "cn": "多汁的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "lady",
-        "cn": "女士",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "lamp",
-        "cn": "灯",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "long jump",
-        "cn": "跳远",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "meter",
-        "cn": "米",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "mind",
-        "cn": "头脑；思想",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "never",
-        "cn": "决不；永不",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "noise",
-        "cn": "噪音",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "nursing",
-        "cn": "护理工作",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "onto",
-        "cn": "在……之上",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "passage",
-        "cn": "一段；一节",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "person",
-        "cn": "人",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "poster",
-        "cn": "海报",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "program",
-        "cn": "项目；节目；计划",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "protect",
-        "cn": "保护",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "questionnaire",
-        "cn": "问卷调查",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "rack",
-        "cn": "支架；架子",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "reference",
-        "cn": "参考；参照",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "return",
-        "cn": "回；回到",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "send",
-        "cn": "邮寄；发送",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "ski",
-        "cn": "滑雪",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "slide",
-        "cn": "滑梯",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "snowboard",
-        "cn": "滑雪板",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "successful",
-        "cn": "成功的",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "teeth",
-        "cn": "（tooth.的复数）牙齿",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "telephone",
-        "cn": "电话",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "till",
-        "cn": "直到……为止",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "took",
-        "cn": "（take 的过去式）带走；拿走；乘坐（交通工具）",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "toothache",
-        "cn": "牙痛",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "toothbrush",
-        "cn": "牙刷",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "toothpaste",
-        "cn": "牙膏",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "trousers",
-        "cn": "长裤",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "truck",
-        "cn": "卡车",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "value",
-        "cn": "价值；估价",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "warmly",
-        "cn": "热情地；温暖地",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "went",
-        "cn": "（go的过去式）去；走",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "while",
-        "cn": "一段时间；当……时候",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "workplace",
-        "cn": "工作地点",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "writer",
-        "cn": "作家；作者",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "wrote",
-        "cn": "（write的过去式）写；写作",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "yesterday",
-        "cn": "昨天",
-        "ipa": ""
-      },
-      {
-        "unit": 4,
-        "en": "youth",
-        "cn": "青年；青年时期",
-        "ipa": ""
-      }
-    ]
-  },
-  {
-    "semester": "四年级下册",
-    "words": [
-      {
-        "unit": 1,
-        "en": "weekly",
-        "cn": "每周的",
-        "ipa": "ˈwiːkli"
-      },
-      {
-        "unit": 2,
-        "en": "evening",
-        "cn": "傍晚",
-        "ipa": "ˈiːvnɪŋ"
-      },
-      {
-        "unit": 1,
-        "en": "activity",
-        "cn": "活动",
-        "ipa": "ækˈtɪvəti"
-      },
-      {
-        "unit": 2,
-        "en": "picnic",
-        "cn": "野餐",
-        "ipa": "ˈpɪknɪk"
-      },
-      {
-        "unit": 1,
-        "en": "week",
-        "cn": "星期, 周",
-        "ipa": "wiːk"
-      },
-      {
-        "unit": 2,
-        "en": "subject",
-        "cn": "科目",
-        "ipa": "ˈsʌbdʒɪkt"
-      },
-      {
-        "unit": 1,
-        "en": "Sunday",
-        "cn": "星期日",
-        "ipa": "ˈsʌndeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "science",
-        "cn": "科学",
-        "ipa": "ˈsaɪəns"
-      },
-      {
-        "unit": 1,
-        "en": "Monday",
-        "cn": "星期一",
-        "ipa": "ˈmʌndeɪ; ˈmʌndi"
-      },
-      {
-        "unit": 2,
-        "en": "math",
-        "cn": "数学",
-        "ipa": "mæθ"
-      },
-      {
-        "unit": 1,
-        "en": "Tuesday",
-        "cn": "星期二",
-        "ipa": "ˈtjuːzdeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "because",
-        "cn": "因为",
-        "ipa": "bɪˈkɒz;bɪˈkəz"
-      },
-      {
-        "unit": 1,
-        "en": "Wednesday",
-        "cn": "星期三",
-        "ipa": "ˈwenzdeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "useful",
-        "cn": "有用的",
-        "ipa": "ˈjuːsf(ə)l"
-      },
-      {
-        "unit": 1,
-        "en": "Thursday",
-        "cn": "星期四",
-        "ipa": "ˈθɜːzdeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "but",
-        "cn": "但是",
-        "ipa": "bʌt; bət"
-      },
-      {
-        "unit": 1,
-        "en": "Friday",
-        "cn": "星期五",
-        "ipa": "ˈfraɪdeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "worry",
-        "cn": "担心",
-        "ipa": "ˈwʌri"
-      },
-      {
-        "unit": 1,
-        "en": "Saturday",
-        "cn": "星期六",
-        "ipa": "ˈsætədeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "water",
-        "cn": "水;浇水",
-        "ipa": "ˈwɔːtə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "fifty",
-        "cn": "五十",
-        "ipa": "ˈfɪfti"
-      },
-      {
-        "unit": 2,
-        "en": "poem",
-        "cn": "诗",
-        "ipa": "ˈpəʊɪm"
-      },
-      {
-        "unit": 1,
-        "en": "must",
-        "cn": "必须",
-        "ipa": "mʌst; məst"
-      },
-      {
-        "unit": 2,
-        "en": "kind",
-        "cn": "体贴的;友好的",
-        "ipa": "kaɪnd"
-      },
-      {
-        "unit": 1,
-        "en": "robot",
-        "cn": "机器人",
-        "ipa": "ˈrəʊbɒt"
-      },
-      {
-        "unit": 2,
-        "en": "exercise",
-        "cn": "锻炼",
-        "ipa": "ˈeksəsaɪz"
-      },
-      {
-        "unit": 1,
-        "en": "weekday",
-        "cn": "工作日",
-        "ipa": "ˈwiːkdeɪ"
-      },
-      {
-        "unit": 2,
-        "en": "fox",
-        "cn": "狐狸",
-        "ipa": "fɒks"
-      },
-      {
-        "unit": 1,
-        "en": "piano",
-        "cn": "钢琴",
-        "ipa": "piˈænəʊ"
-      },
-      {
-        "unit": 2,
-        "en": "enjoy",
-        "cn": "欣赏;享受",
-        "ipa": "ɪnˈdʒɔɪ"
-      },
-      {
-        "unit": 1,
-        "en": "chess",
-        "cn": "国际象棋",
-        "ipa": "tʃes"
-      },
-      {
-        "unit": 2,
-        "en": "search",
-        "cn": "搜查;搜寻",
-        "ipa": "sɜːtʃ"
-      },
-      {
-        "unit": 1,
-        "en": "every",
-        "cn": "每个",
-        "ipa": "ˈevri"
-      },
-      {
-        "unit": 2,
-        "en": "internet",
-        "cn": "互联网",
-        "ipa": "ˈɪntənet"
-      },
-      {
-        "unit": 1,
-        "en": "sit",
-        "cn": "坐",
-        "ipa": "sɪt"
-      },
-      {
-        "unit": 2,
-        "en": "information",
-        "cn": "信息",
-        "ipa": "ˌɪnfəˈmeɪʃ(ə)n"
-      },
-      {
-        "unit": 1,
-        "en": "door",
-        "cn": "门",
-        "ipa": "dɔː(r)"
-      },
-      {
-        "unit": 2,
-        "en": "tell",
-        "cn": "告诉",
-        "ipa": "tel"
-      },
-      {
-        "unit": 1,
-        "en": "helpful",
-        "cn": "有帮助的;乐于助人的",
-        "ipa": "ˈhelpf(ə)l"
-      },
-      {
-        "unit": 2,
-        "en": "story",
-        "cn": "故事",
-        "ipa": "ˈstɔːri"
-      },
-      {
-        "unit": 1,
-        "en": "foot",
-        "cn": "(复数 feet)脚",
-        "ipa": "fʊt"
-      },
-      {
-        "unit": 2,
-        "en": "fly",
-        "cn": "飞;放飞",
-        "ipa": "flaɪ"
-      },
-      {
-        "unit": 1,
-        "en": "tomorrow",
-        "cn": "明天",
-        "ipa": "təˈmɒrəʊ"
-      },
-      {
-        "unit": 2,
-        "en": "why",
-        "cn": "为什么",
-        "ipa": "waɪ"
-      },
-      {
-        "unit": 1,
-        "en": "weekend",
-        "cn": "周末",
-        "ipa": "ˌwiːkˈend; ˈwiːkend"
-      },
-      {
-        "unit": 2,
-        "en": "slide show",
-        "cn": "幻灯片放映",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "hooray",
-        "cn": "(表示高兴、赞许等)好哇",
-        "ipa": "huˈreɪ"
-      },
-      {
-        "unit": 2,
-        "en": "zero",
-        "cn": "零",
-        "ipa": "ˈzɪərəʊ"
-      },
-      {
-        "unit": 1,
-        "en": "film",
-        "cn": "电影",
-        "ipa": "fɪlm"
-      },
-      {
-        "unit": 2,
-        "en": "feeling",
-        "cn": "感觉",
-        "ipa": "ˈfiːlɪŋ"
-      },
-      {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "tired",
-        "cn": "疲倦的",
-        "ipa": "ˈtaɪəd"
-      },
-      {
-        "unit": 2,
-        "en": "near",
-        "cn": "在附近",
-        "ipa": "nɪə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "excited",
-        "cn": "激动的",
-        "ipa": "ɪkˈsaɪtɪd"
-      },
-      {
-        "unit": 2,
-        "en": "far",
-        "cn": "遥远的",
-        "ipa": "fɑː(r)"
-      },
-      {
-        "unit": 1,
-        "en": "over",
-        "cn": "在......上面",
-        "ipa": "ˈəʊvə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "away",
-        "cn": "去别处;离开",
-        "ipa": "əˈweɪ"
-      },
-      {
-        "unit": 1,
-        "en": "nervous",
-        "cn": "紧张的",
-        "ipa": "ˈnɜːvəs"
-      },
-      {
-        "unit": 2,
-        "en": "dad",
-        "cn": "爸爸",
-        "ipa": "dæd"
-      },
-      {
-        "unit": 1,
-        "en": "winner",
-        "cn": "获胜者",
-        "ipa": "ˈwɪnə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "take",
-        "cn": "带走;拿走;搭乘(交通工具)",
-        "ipa": "teɪk"
-      },
-      {
-        "unit": 1,
-        "en": "proud",
-        "cn": "自豪的",
-        "ipa": "praʊd"
-      },
-      {
-        "unit": 2,
-        "en": "does",
-        "cn": "(do的第三人称单数形式)做",
-        "ipa": "dʌz"
-      },
-      {
-        "unit": 1,
-        "en": "feel",
-        "cn": "感到;觉得",
-        "ipa": "fiːl"
-      },
-      {
-        "unit": 2,
-        "en": "work",
-        "cn": "工作",
-        "ipa": "wɜːk"
-      },
-      {
-        "unit": 1,
-        "en": "better",
-        "cn": "较好的;更好的",
-        "ipa": "ˈbetə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "his",
-        "cn": "他的",
-        "ipa": "hɪz; ɪz"
-      },
-      {
-        "unit": 1,
-        "en": "next",
-        "cn": "下一个的",
-        "ipa": "nekst"
-      },
-      {
-        "unit": 2,
-        "en": "office",
-        "cn": "办公室",
-        "ipa": "ˈɒfɪs"
-      },
-      {
-        "unit": 1,
-        "en": "sad",
-        "cn": "悲伤的",
-        "ipa": "sæd"
-      },
-      {
-        "unit": 2,
-        "en": "live",
-        "cn": "生活",
-        "ipa": "lɪv; laɪv"
-      },
-      {
-        "unit": 1,
-        "en": "him",
-        "cn": "他(宾格)",
-        "ipa": "hɪm"
-      },
-      {
-        "unit": 2,
-        "en": "forty",
-        "cn": "四十",
-        "ipa": "ˈfɔːti"
-      },
-      {
-        "unit": 1,
-        "en": "high",
-        "cn": "高的",
-        "ipa": "haɪ"
-      },
-      {
-        "unit": 2,
-        "en": "travel",
-        "cn": "旅游",
-        "ipa": "ˈtræv(ə)l"
-      },
-      {
-        "unit": 1,
-        "en": "angry",
-        "cn": "愤怒的",
-        "ipa": "ˈæŋɡri"
-      },
-      {
-        "unit": 2,
-        "en": "train",
-        "cn": "火车",
-        "ipa": "treɪn"
-      },
-      {
-        "unit": 1,
-        "en": "count",
-        "cn": "数数;计算",
-        "ipa": "kaʊnt"
-      },
-      {
-        "unit": 2,
-        "en": "cheap",
-        "cn": "便宜的",
-        "ipa": "tʃiːp"
-      },
-      {
-        "unit": 1,
-        "en": "parent",
-        "cn": "父,母;家长",
-        "ipa": "ˈpeərənt"
-      },
-      {
-        "unit": 2,
-        "en": "summer",
-        "cn": "夏天",
-        "ipa": "ˈsʌmə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "farm",
-        "cn": "农场",
-        "ipa": "fɑːm"
-      },
-      {
-        "unit": 2,
-        "en": "holiday",
-        "cn": "假期;节日",
-        "ipa": "ˈhɒlədeɪ"
-      },
-      {
-        "unit": 1,
-        "en": "poor",
-        "cn": "可怜的;贫穷的",
-        "ipa": "pɔː(r); pʊə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "plane",
-        "cn": "飞机",
-        "ipa": "pleɪn"
-      },
-      {
-        "unit": 1,
-        "en": "duckling",
-        "cn": "小鸭",
-        "ipa": "ˈdʌklɪŋ"
-      },
-      {
-        "unit": 2,
-        "en": "surprise",
-        "cn": "惊喜",
-        "ipa": "səˈpraɪz"
-      },
-      {
-        "unit": 1,
-        "en": "bored",
-        "cn": "厌倦的;烦闷的",
-        "ipa": "bɔːd"
-      },
-      {
-        "unit": 2,
-        "en": "turn",
-        "cn": "转动;转弯",
-        "ipa": "tɜːn"
-      },
-      {
-        "unit": 1,
-        "en": "ugly",
-        "cn": "丑陋的",
-        "ipa": "ˈʌɡli"
-      },
-      {
-        "unit": 2,
-        "en": "will",
-        "cn": "(构成将来时) 将;会",
-        "ipa": "wɪl"
-      },
-      {
-        "unit": 1,
-        "en": "lonely",
-        "cn": "孤独的;寂寞的",
-        "ipa": "ˈləʊnli"
-      },
-      {
-        "unit": 2,
-        "en": "I'll=I will",
-        "cn": "我将会",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "thirsty",
-        "cn": "渴的",
-        "ipa": "ˈθɜːsti"
-      },
-      {
-        "unit": 2,
-        "en": "the UK",
-        "cn": "英国",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "swan",
-        "cn": "天鹅",
-        "ipa": "swɒn"
-      },
-      {
-        "unit": 2,
-        "en": "Hong Kong",
-        "cn": "香港",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "by",
-        "cn": "通过;以......(方式)",
-        "ipa": "baɪ"
-      },
-      {
-        "unit": 2,
-        "en": "ship",
-        "cn": "船",
-        "ipa": "ʃɪp"
-      },
-      {
-        "unit": 1,
-        "en": "subway",
-        "cn": "地铁",
-        "ipa": "ˈsʌbweɪ"
-      }
-    ]
-  },
+    const allData = [
   {
     "semester": "三年级上册",
     "words": [
       {
+        "no": 1,
         "unit": 1,
         "en": "meet",
         "cn": "遇见",
-        "ipa": "miːt"
+        "ipa": "/miːt/"
       },
       {
-        "unit": 2,
-        "en": "please",
-        "cn": "请",
-        "ipa": "pliːz"
-      },
-      {
+        "no": 2,
         "unit": 1,
         "en": "friend",
         "cn": "朋友",
-        "ipa": "frend"
+        "ipa": "/frend/"
       },
       {
-        "unit": 2,
-        "en": "at",
-        "cn": "在(某处);在(几点钟)",
-        "ipa": "æt; ət"
-      },
-      {
+        "no": 3,
         "unit": 1,
         "en": "nice",
         "cn": "高兴的",
-        "ipa": "naɪs"
+        "ipa": "/naɪs/"
       },
       {
-        "unit": 2,
-        "en": "school",
-        "cn": "学校",
-        "ipa": "skuːl"
-      },
-      {
+        "no": 4,
         "unit": 1,
         "en": "to",
         "cn": "对;向",
-        "ipa": "tuː; tə"
+        "ipa": "/tuː; tə/"
       },
       {
-        "unit": 2,
-        "en": "gate",
-        "cn": "大门",
-        "ipa": "ɡeɪt"
-      },
-      {
+        "no": 5,
         "unit": 1,
         "en": "you",
         "cn": "你;您;你们",
-        "ipa": "juː; jʊ"
+        "ipa": "/juː; jʊ/"
       },
       {
-        "unit": 2,
-        "en": "hi",
-        "cn": "你好",
-        "ipa": "haɪ"
-      },
-      {
+        "no": 6,
         "unit": 1,
         "en": "in",
         "cn": "在......内;在......状态中",
-        "ipa": "ɪn"
+        "ipa": "/ɪn/"
       },
       {
-        "unit": 2,
-        "en": "my",
-        "cn": "我的",
-        "ipa": "maɪ"
-      },
-      {
+        "no": 7,
         "unit": 1,
         "en": "the",
         "cn": "这(那)个;这(那)些",
-        "ipa": "ðə; ði"
+        "ipa": "/ðə; ði/"
       },
       {
-        "unit": 2,
-        "en": "cat",
-        "cn": "猫",
-        "ipa": "kæt"
-      },
-      {
+        "no": 8,
         "unit": 1,
         "en": "classroom",
         "cn": "教室",
-        "ipa": "ˈklɑːsruːm"
+        "ipa": "/ˈklɑːsruːm/"
       },
       {
-        "unit": 2,
-        "en": "dog",
-        "cn": "狗",
-        "ipa": "dɒɡ"
-      },
-      {
+        "no": 9,
         "unit": 1,
         "en": "hello",
         "cn": "你好",
-        "ipa": "həˈləʊ"
+        "ipa": "/həˈləʊ/"
       },
       {
-        "unit": 2,
-        "en": "how",
-        "cn": "怎样;多少;多么",
-        "ipa": "haʊ"
-      },
-      {
+        "no": 10,
         "unit": 1,
         "en": "boy",
         "cn": "男孩",
-        "ipa": "bɔɪ"
+        "ipa": "/bɔɪ/"
       },
       {
-        "unit": 2,
-        "en": "are",
-        "cn": "是",
-        "ipa": "ɑː(r); ə(r)"
-      },
-      {
+        "no": 11,
         "unit": 1,
         "en": "and",
         "cn": "和",
-        "ipa": "ænd; ənd"
+        "ipa": "/ænd; ənd/"
       },
       {
-        "unit": 2,
-        "en": "home",
-        "cn": "家",
-        "ipa": "həʊm"
-      },
-      {
+        "no": 12,
         "unit": 1,
         "en": "girl",
         "cn": "女孩",
-        "ipa": "ɡɜːl"
+        "ipa": "/ɡɜːl/"
       },
       {
-        "unit": 2,
-        "en": "good",
-        "cn": "好的",
-        "ipa": "ɡʊd"
-      },
-      {
+        "no": 13,
         "unit": 1,
         "en": "I",
         "cn": "我",
-        "ipa": "aɪ"
+        "ipa": "/aɪ/"
       },
       {
-        "unit": 2,
-        "en": "morning",
-        "cn": "早晨;上午",
-        "ipa": "ˈmɔːnɪŋ"
-      },
-      {
+        "no": 14,
         "unit": 1,
         "en": "am",
         "cn": "是",
-        "ipa": "æm; əm"
+        "ipa": "/æm; əm/"
       },
       {
-        "unit": 2,
-        "en": "mom",
-        "cn": "妈妈",
-        "ipa": "mɒm"
-      },
-      {
+        "no": 15,
         "unit": 1,
         "en": "I'm=I am",
         "cn": "我是",
-        "ipa": "aɪ"
+        "ipa": "/aɪ/"
       },
       {
-        "unit": 2,
-        "en": "woof",
-        "cn": "(狗叫声)汪!",
-        "ipa": "wʊf"
-      },
-      {
+        "no": 16,
         "unit": 1,
         "en": "Miss",
         "cn": "女士;小姐",
-        "ipa": "mɪs"
+        "ipa": "/mɪs/"
       },
       {
-        "unit": 2,
-        "en": "fine",
-        "cn": "健康的;晴朗的",
-        "ipa": "faɪn"
-      },
-      {
+        "no": 17,
         "unit": 1,
         "en": "too",
         "cn": "也;太",
-        "ipa": "tuː"
+        "ipa": "/tuː/"
       },
       {
-        "unit": 2,
-        "en": "thank",
-        "cn": "谢谢",
-        "ipa": "θæŋk"
-      },
-      {
+        "no": 18,
         "unit": 1,
         "en": "a/an",
         "cn": "一 个",
-        "ipa": "ə;eɪ"
+        "ipa": "/ə;eɪ/"
       },
       {
-        "unit": 2,
-        "en": "afternoon",
-        "cn": "下午",
-        "ipa": "ˌɑːftəˈnuːn"
-      },
-      {
+        "no": 19,
         "unit": 1,
         "en": "apple",
         "cn": "苹果",
-        "ipa": "ˈæp(ə)l"
+        "ipa": "/ˈæp(ə)l/"
       },
       {
-        "unit": 2,
-        "en": "egg",
-        "cn": "蛋",
-        "ipa": "eɡ"
-      },
-      {
+        "no": 20,
         "unit": 1,
         "en": "banana",
         "cn": "香蕉",
-        "ipa": "bəˈnɑːnə"
+        "ipa": "/bəˈnɑːnə/"
       },
       {
-        "unit": 2,
-        "en": "fish",
-        "cn": "鱼;鱼肉",
-        "ipa": "fɪʃ"
-      },
-      {
+        "no": 21,
         "unit": 1,
         "en": "what",
         "cn": "什么",
-        "ipa": "wɒt"
+        "ipa": "/wɒt/"
       },
       {
-        "unit": 2,
-        "en": "have",
-        "cn": "有;吃,喝",
-        "ipa": "hæv; həv"
-      },
-      {
+        "no": 22,
         "unit": 1,
         "en": "is",
         "cn": "是",
-        "ipa": "ɪz"
+        "ipa": "/ɪz/"
       },
       {
-        "unit": 2,
-        "en": "day",
-        "cn": "(一)天;(一)日",
-        "ipa": "deɪ"
-      },
-      {
+        "no": 23,
         "unit": 1,
         "en": "what's=what is",
         "cn": "是什么",
-        "ipa": "wɒt"
+        "ipa": "/wɒt/"
       },
       {
-        "unit": 2,
-        "en": "street",
-        "cn": "大街;街道",
-        "ipa": "striːt"
-      },
-      {
+        "no": 24,
         "unit": 1,
         "en": "your",
         "cn": "你的;你们的",
-        "ipa": "jɔː(r); jə(r)"
+        "ipa": "/jɔː(r); jə(r)/"
       },
       {
-        "unit": 2,
-        "en": "this",
-        "cn": "这个",
-        "ipa": "ðɪs"
-      },
-      {
+        "no": 25,
         "unit": 1,
         "en": "name",
         "cn": "名字;叫出",
-        "ipa": "neɪm"
+        "ipa": "/neɪm/"
       },
       {
+        "no": 26,
         "unit": 2,
-        "en": "goodbye",
-        "cn": "再见",
-        "ipa": "ˌɡʊdˈbaɪ"
-      },
-      {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
         "en": "bye",
         "cn": "再见",
-        "ipa": "baɪ"
+        "ipa": "/baɪ/"
       },
       {
+        "no": 27,
         "unit": 2,
-        "en": "many",
-        "cn": "许多的",
-        "ipa": "ˈmeni"
-      },
-      {
-        "unit": 1,
         "en": "hen",
         "cn": "母鸡",
-        "ipa": "hen"
+        "ipa": "/hen/"
       },
       {
+        "no": 28,
         "unit": 2,
-        "en": "really",
-        "cn": "(表示惊奇;兴趣;怀疑等)当真;真正地",
-        "ipa": "ˈriːəli"
-      },
-      {
-        "unit": 1,
         "en": "fun",
         "cn": "有趣的;乐趣",
-        "ipa": "fʌn"
+        "ipa": "/fʌn/"
       },
       {
+        "no": 29,
         "unit": 2,
-        "en": "yes",
-        "cn": "是,是的;同意",
-        "ipa": "jes"
-      },
-      {
-        "unit": 1,
         "en": "number",
         "cn": "号码;数字",
-        "ipa": "ˈnʌmbə(r)"
+        "ipa": "/ˈnʌmbə(r)/"
       },
       {
+        "no": 30,
         "unit": 2,
-        "en": "that",
-        "cn": "那;那个",
-        "ipa": "ðæt"
-      },
-      {
-        "unit": 1,
         "en": "let",
         "cn": "让",
-        "ipa": "let"
+        "ipa": "/let/"
       },
       {
+        "no": 31,
         "unit": 2,
-        "en": "that's=that is",
-        "cn": "那是",
-        "ipa": "ðæt"
-      },
-      {
-        "unit": 1,
         "en": "us",
         "cn": "我们(宾格)",
-        "ipa": "ʌs; əs"
+        "ipa": "/ʌs; əs/"
       },
       {
+        "no": 32,
         "unit": 2,
-        "en": "right",
-        "cn": "正确的;右边的",
-        "ipa": "raɪt"
-      },
-      {
-        "unit": 1,
         "en": "let's =let us",
         "cn": "让我们",
-        "ipa": "let"
+        "ipa": "/let/"
       },
       {
+        "no": 33,
         "unit": 2,
-        "en": "kite",
-        "cn": "风筝",
-        "ipa": "kaɪt"
-      },
-      {
-        "unit": 1,
         "en": "play",
         "cn": "玩耍;演奏",
-        "ipa": "pleɪ"
+        "ipa": "/pleɪ/"
       },
       {
+        "no": 34,
         "unit": 2,
-        "en": "lion",
-        "cn": "狮子",
-        "ipa": "ˈlaɪən"
-      },
-      {
-        "unit": 1,
         "en": "park",
         "cn": "公园;停车场;停放(车辆等)",
-        "ipa": "pɑːk"
+        "ipa": "/pɑːk/"
       },
       {
+        "no": 35,
         "unit": 2,
-        "en": "how old",
-        "cn": "多大(年龄)",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
         "en": "OK",
         "cn": "行,好;不错的",
-        "ipa": "əʊˈkeɪ"
+        "ipa": "/əʊˈkeɪ/"
       },
       {
+        "no": 36,
         "unit": 2,
-        "en": "go",
-        "cn": "去;走",
-        "ipa": "ɡəʊ"
-      },
-      {
-        "unit": 1,
         "en": "one",
         "cn": "—",
-        "ipa": "wʌn"
+        "ipa": "/wʌn/"
       },
       {
+        "no": 37,
         "unit": 2,
-        "en": "old",
-        "cn": "......岁;年老的;陈旧的",
-        "ipa": "əʊld"
-      },
-      {
-        "unit": 1,
         "en": "two",
         "cn": "二",
-        "ipa": "tuː"
+        "ipa": "/tuː/"
       },
       {
+        "no": 38,
         "unit": 2,
-        "en": "year",
-        "cn": "年",
-        "ipa": "jɪə(r)"
-      },
-      {
-        "unit": 1,
         "en": "three",
         "cn": "三",
-        "ipa": "θriː"
+        "ipa": "/θriː/"
       },
       {
+        "no": 39,
         "unit": 2,
-        "en": "oh",
-        "cn": "啊,呀",
-        "ipa": "əʊ"
-      },
-      {
-        "unit": 1,
         "en": "four",
         "cn": "四",
-        "ipa": "fɔː(r)"
+        "ipa": "/fɔː(r)/"
       },
       {
+        "no": 40,
         "unit": 2,
-        "en": "sorry",
-        "cn": "对不起,抱歉",
-        "ipa": "ˈsɒri"
-      },
-      {
-        "unit": 1,
         "en": "five",
         "cn": "五",
-        "ipa": "faɪv"
+        "ipa": "/faɪv/"
       },
       {
+        "no": 41,
         "unit": 2,
-        "en": "how about",
-        "cn": "怎么样",
-        "ipa": "haʊəˈbaʊt"
-      },
-      {
-        "unit": 1,
         "en": "six",
         "cn": "六",
-        "ipa": "sɪks"
+        "ipa": "/sɪks/"
       },
       {
+        "no": 42,
         "unit": 2,
-        "en": "yeah",
-        "cn": "是的",
-        "ipa": "jeə"
-      },
-      {
-        "unit": 1,
         "en": "seven",
         "cn": "七",
-        "ipa": "ˈsev(ə)n"
+        "ipa": "/ˈsev(ə)n/"
       },
       {
+        "no": 43,
         "unit": 2,
-        "en": "monkey",
-        "cn": "猴子",
-        "ipa": "ˈmʌŋki"
-      },
-      {
-        "unit": 1,
         "en": "eight",
         "cn": "八",
-        "ipa": "eɪt"
+        "ipa": "/eɪt/"
       },
       {
+        "no": 44,
         "unit": 2,
-        "en": "noodle",
-        "cn": "面条",
-        "ipa": "ˈnuːd(ə)l"
-      },
-      {
-        "unit": 1,
         "en": "nine",
         "cn": "九",
-        "ipa": "naɪn"
+        "ipa": "/naɪn/"
       },
       {
+        "no": 45,
         "unit": 2,
-        "en": "phone",
-        "cn": "电话",
-        "ipa": "fəʊn"
-      },
-      {
-        "unit": 1,
         "en": "ten",
         "cn": "十",
-        "ipa": "ten"
+        "ipa": "/ten/"
       },
       {
+        "no": 46,
         "unit": 2,
-        "en": "it",
-        "cn": "它",
-        "ipa": "ɪt"
-      },
-      {
-        "unit": 1,
         "en": "great",
         "cn": "极好的;杰出的",
-        "ipa": "ɡreɪt"
+        "ipa": "/ɡreɪt/"
       },
       {
+        "no": 47,
         "unit": 2,
-        "en": "it's=it is",
-        "cn": "它是",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
         "en": "ice cream",
         "cn": "冰激凌",
-        "ipa": "ˈaɪskriːm"
+        "ipa": "/ˈaɪskriːm/"
       },
       {
+        "no": 48,
         "unit": 2,
-        "en": "pet",
-        "cn": "宠物",
-        "ipa": "pet"
-      },
-      {
-        "unit": 1,
         "en": "jacket",
         "cn": "夹克",
-        "ipa": "ˈdʒækɪt"
+        "ipa": "/ˈdʒækɪt/"
       },
       {
+        "no": 49,
         "unit": 2,
-        "en": "orange",
-        "cn": "橙子;橙色;橙色的",
-        "ipa": "ˈɒrɪndʒ"
-      },
-      {
-        "unit": 1,
         "en": "how many",
         "cn": "多少",
-        "ipa": "haʊˈmeni"
+        "ipa": "/haʊˈmeni/"
       },
       {
+        "no": 50,
         "unit": 2,
-        "en": "pig",
-        "cn": "猪",
-        "ipa": "pɪɡ"
-      },
-      {
-        "unit": 1,
         "en": "duck",
         "cn": "鸭子",
-        "ipa": "dʌk"
+        "ipa": "/dʌk/"
       },
       {
-        "unit": 2,
-        "en": "color",
-        "cn": "颜色;给......着色",
-        "ipa": "ˈkʌlə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 51,
+        "unit": 3,
         "en": "look",
         "cn": "看",
-        "ipa": "lʊk"
+        "ipa": "/lʊk/"
       },
       {
-        "unit": 2,
-        "en": "around",
-        "cn": "围绕",
-        "ipa": "əˈraʊnd"
-      },
-      {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 52,
+        "unit": 3,
         "en": "green",
         "cn": "绿色;绿色的",
-        "ipa": "ɡriːn"
+        "ipa": "/ɡriːn/"
       },
       {
-        "unit": 2,
-        "en": "ruler",
-        "cn": "尺子",
-        "ipa": "ˈruːlə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 53,
+        "unit": 3,
         "en": "on",
         "cn": "在......之上;在......时候",
-        "ipa": "ɒn"
+        "ipa": "/ɒn/"
       },
       {
-        "unit": 2,
-        "en": "book",
-        "cn": "书",
-        "ipa": "bʊk"
-      },
-      {
-        "unit": 1,
+        "no": 54,
+        "unit": 3,
         "en": "way",
         "cn": "路,道路;方式",
-        "ipa": "weɪ"
+        "ipa": "/weɪ/"
       },
       {
-        "unit": 2,
-        "en": "eraser",
-        "cn": "橡皮擦",
-        "ipa": "ɪˈreɪzə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 55,
+        "unit": 3,
         "en": "stop",
         "cn": "停止,停下;车站",
-        "ipa": "stɒp"
+        "ipa": "/stɒp/"
       },
       {
-        "unit": 2,
-        "en": "umbrella",
-        "cn": "雨伞",
-        "ipa": "ʌmˈbrelə"
-      },
-      {
-        "unit": 1,
+        "no": 56,
+        "unit": 3,
         "en": "light",
         "cn": "灯;光线;浅色的",
-        "ipa": "laɪt"
+        "ipa": "/laɪt/"
       },
       {
-        "unit": 2,
-        "en": "violin",
-        "cn": "小提琴",
-        "ipa": "ˌvaɪəˈlɪn"
-      },
-      {
-        "unit": 1,
+        "no": 57,
+        "unit": 3,
         "en": "red",
         "cn": "红色;红色的",
-        "ipa": "red"
+        "ipa": "/red/"
       },
       {
-        "unit": 2,
-        "en": "they",
-        "cn": "他们;她们;它们",
-        "ipa": "ðeɪ"
-      },
-      {
-        "unit": 1,
+        "no": 58,
+        "unit": 3,
         "en": "now",
         "cn": "现在",
-        "ipa": "naʊ"
+        "ipa": "/naʊ/"
       },
       {
-        "unit": 2,
-        "en": "colorful",
-        "cn": "多彩的",
-        "ipa": "ˈkʌləf(ə)l"
-      },
-      {
-        "unit": 1,
+        "no": 59,
+        "unit": 3,
         "en": "question",
         "cn": "问题",
-        "ipa": "ˈkwestʃən"
+        "ipa": "/ˈkwestʃən/"
       },
       {
-        "unit": 2,
-        "en": "flower",
-        "cn": "花",
-        "ipa": "ˈflaʊə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 60,
+        "unit": 3,
         "en": "rabbit",
         "cn": "兔子",
-        "ipa": "ˈræbɪt"
+        "ipa": "/ˈræbɪt/"
       },
       {
-        "unit": 2,
-        "en": "after",
-        "cn": "在......之后",
-        "ipa": "ˈɑːftə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 61,
+        "unit": 3,
         "en": "art",
         "cn": "美术;艺术",
-        "ipa": "ɑːt"
+        "ipa": "/ɑːt/"
       },
       {
-        "unit": 2,
-        "en": "step",
-        "cn": "步骤;脚步",
-        "ipa": "step"
-      },
-      {
-        "unit": 1,
+        "no": 62,
+        "unit": 3,
         "en": "class",
         "cn": "课;班级",
-        "ipa": "klɑːs"
+        "ipa": "/klɑːs/"
       },
       {
-        "unit": 2,
-        "en": "draw",
-        "cn": "画画",
-        "ipa": "drɔː"
-      },
-      {
-        "unit": 1,
+        "no": 63,
+        "unit": 3,
         "en": "game",
         "cn": "游戏;比赛",
-        "ipa": "ɡeɪm"
+        "ipa": "/ɡeɪm/"
       },
       {
-        "unit": 2,
-        "en": "cut",
-        "cn": "剪;切",
-        "ipa": "kʌt"
-      },
-      {
-        "unit": 1,
+        "no": 64,
+        "unit": 3,
         "en": "blue",
         "cn": "蓝色;蓝色的",
-        "ipa": "bluː"
+        "ipa": "/bluː/"
       },
       {
-        "unit": 2,
-        "en": "make",
-        "cn": "制作;使变得",
-        "ipa": "meɪk"
-      },
-      {
-        "unit": 1,
+        "no": 65,
+        "unit": 3,
         "en": "yellow",
         "cn": "黄色;黄色的",
-        "ipa": "ˈjeləʊ"
+        "ipa": "/ˈjeləʊ/"
       },
       {
-        "unit": 2,
-        "en": "window",
-        "cn": "窗户",
-        "ipa": "ˈwɪndəʊ"
-      },
-      {
-        "unit": 1,
+        "no": 66,
+        "unit": 3,
         "en": "wow",
         "cn": "呀,哇",
-        "ipa": "waʊ"
+        "ipa": "/waʊ/"
       },
       {
-        "unit": 2,
-        "en": "X-ray",
-        "cn": "X光",
-        "ipa": "ˈeks reɪ"
-      },
-      {
-        "unit": 1,
+        "no": 67,
+        "unit": 3,
         "en": "white",
         "cn": "白色;白色的",
-        "ipa": "waɪt"
+        "ipa": "/waɪt/"
       },
       {
-        "unit": 2,
-        "en": "love",
-        "cn": "爱;喜爱",
-        "ipa": "lʌv"
-      },
-      {
-        "unit": 1,
+        "no": 68,
+        "unit": 3,
         "en": "pink",
         "cn": "粉红色;粉红色的",
-        "ipa": "pɪŋk"
+        "ipa": "/pɪŋk/"
       },
       {
-        "unit": 2,
-        "en": "family",
-        "cn": "家庭",
-        "ipa": "ˈfæməli"
-      },
-      {
-        "unit": 1,
+        "no": 69,
+        "unit": 3,
         "en": "star",
         "cn": "星星",
-        "ipa": "stɑː(r)"
+        "ipa": "/stɑː(r)/"
       },
       {
-        "unit": 2,
-        "en": "father",
-        "cn": "父亲;爸爸",
-        "ipa": "ˈfɑːðə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 70,
+        "unit": 3,
         "en": "teacher",
         "cn": "老师",
-        "ipa": "ˈtiːtʃə(r)"
+        "ipa": "/ˈtiːtʃə(r)/"
       },
       {
-        "unit": 2,
-        "en": "brother",
-        "cn": "哥哥;弟弟",
-        "ipa": "ˈbrʌðə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 71,
+        "unit": 3,
         "en": "show",
         "cn": "给......看;展示;展览(会)",
-        "ipa": "ʃəʊ"
+        "ipa": "/ʃəʊ/"
       },
       {
-        "unit": 2,
-        "en": "sister",
-        "cn": "姐姐;妹妹",
-        "ipa": "ˈsɪstə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 72,
+        "unit": 3,
         "en": "me",
         "cn": "我(宾格)",
-        "ipa": "miː; mi"
+        "ipa": "/miː; mi/"
       },
       {
-        "unit": 2,
-        "en": "welcome",
-        "cn": "欢迎",
-        "ipa": "ˈwelkəm"
-      },
-      {
-        "unit": 1,
+        "no": 73,
+        "unit": 3,
         "en": "schoolbag",
         "cn": "书包",
-        "ipa": "ˈskuːlbæɡ"
+        "ipa": "/ˈskuːlbæɡ/"
       },
       {
-        "unit": 2,
-        "en": "mother",
-        "cn": "母亲;妈妈",
-        "ipa": "ˈmʌðə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 74,
+        "unit": 3,
         "en": "pencil box",
         "cn": "笔盒",
-        "ipa": "ˈpensəlbɑːks"
+        "ipa": "/ˈpensəlbɑːks/"
       },
       {
-        "unit": 2,
-        "en": "here",
-        "cn": "这里",
-        "ipa": "hɪə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 75,
+        "unit": 3,
         "en": "black",
         "cn": "黑色;黑色的",
-        "ipa": "blæk"
+        "ipa": "/blæk/"
       },
       {
-        "unit": 2,
-        "en": "cake",
-        "cn": "蛋糕",
-        "ipa": "keɪk"
-      },
-      {
-        "unit": 1,
+        "no": 76,
+        "unit": 4,
         "en": "pen",
         "cn": "钢笔",
-        "ipa": "pen"
+        "ipa": "/pen/"
       },
       {
-        "unit": 2,
-        "en": "zoo",
-        "cn": "动物园",
-        "ipa": "zuː"
-      },
-      {
-        "unit": 1,
+        "no": 77,
+        "unit": 4,
         "en": "pencil",
         "cn": "铅笔",
-        "ipa": "ˈpens(ə)l"
+        "ipa": "/ˈpens(ə)l/"
       },
       {
-        "unit": 2,
-        "en": "who",
-        "cn": "谁",
-        "ipa": "huː"
-      },
-      {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 78,
+        "unit": 4,
         "en": "he",
         "cn": "他",
-        "ipa": "hiː; hi"
+        "ipa": "/hiː; hi/"
       },
       {
-        "unit": 2,
-        "en": "photo",
-        "cn": "照片",
-        "ipa": "ˈfəʊtəʊ"
-      },
-      {
-        "unit": 1,
+        "no": 79,
+        "unit": 4,
         "en": "happy",
         "cn": "开心的",
-        "ipa": "ˈhæpi"
+        "ipa": "/ˈhæpi/"
       },
       {
-        "unit": 2,
-        "en": "so",
-        "cn": "如此,这么;所以",
-        "ipa": "səʊ"
-      },
-      {
-        "unit": 1,
+        "no": 80,
+        "unit": 4,
         "en": "birthday",
         "cn": "生日",
-        "ipa": "ˈbɜːθdeɪ"
+        "ipa": "/ˈbɜːθdeɪ/"
       },
       {
-        "unit": 2,
-        "en": "cute",
-        "cn": "可爱的",
-        "ipa": "kjuːt"
-      },
-      {
-        "unit": 1,
+        "no": 81,
+        "unit": 4,
         "en": "we",
         "cn": "我们",
-        "ipa": "wiː; wi"
+        "ipa": "/wiː; wi/"
       },
       {
-        "unit": 2,
-        "en": "doctor",
-        "cn": "医生",
-        "ipa": "ˈdɒktə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 82,
+        "unit": 4,
         "en": "present",
         "cn": "礼物",
-        "ipa": "ˈprez(ə)nt; prɪˈzent"
+        "ipa": "/ˈprez(ə)nt; prɪˈzent/"
       },
       {
-        "unit": 1,
+        "no": 83,
+        "unit": 4,
         "en": "for",
         "cn": "(表示对象、用途等)给;因为......;对于......",
-        "ipa": "fɔː(r); fə(r)"
+        "ipa": "/fɔː(r); fə(r)/"
       },
       {
-        "unit": 2,
-        "en": "farmer",
-        "cn": "农民",
-        "ipa": "ˈfɑːmə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 84,
+        "unit": 4,
         "en": "grandpa",
         "cn": "爷爷;外公",
-        "ipa": "ˈɡrænpɑː"
+        "ipa": "/ˈɡrænpɑː/"
       },
       {
-        "unit": 2,
-        "en": "cook",
-        "cn": "厨师;煮",
-        "ipa": "kʊk"
-      },
-      {
-        "unit": 1,
+        "no": 85,
+        "unit": 4,
         "en": "she",
         "cn": "她",
-        "ipa": "ʃiː; ʃi"
+        "ipa": "/ʃiː; ʃi/"
       },
       {
-        "unit": 2,
-        "en": "uncle",
-        "cn": "叔;伯;姨夫",
-        "ipa": "ˈʌŋk(ə)l"
-      },
-      {
-        "unit": 1,
+        "no": 86,
+        "unit": 4,
         "en": "grandma",
         "cn": "奶奶;外婆",
-        "ipa": "ˈɡrænmɑː"
+        "ipa": "/ˈɡrænmɑː/"
       },
       {
-        "unit": 2,
-        "en": "worker",
-        "cn": "工人",
-        "ipa": "ˈwɜːkə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 87,
+        "unit": 4,
         "en": "wish",
         "cn": "愿望;希望",
-        "ipa": "wɪʃ"
+        "ipa": "/wɪʃ/"
       },
       {
-        "unit": 2,
-        "en": "aunt",
-        "cn": "婶母;伯母;姨母",
-        "ipa": "ɑːnt"
-      },
-      {
-        "unit": 2,
-        "en": "177",
+        "no": 88,
+        "unit": 4,
+        "en": "blow out",
         "cn": "吹灭",
-        "ipa": ""
+        "ipa": "/ˌbləʊ ˈaʊt/"
       },
       {
-        "unit": 1,
+        "no": 89,
+        "unit": 4,
         "en": "candle",
         "cn": "蜡烛",
-        "ipa": "ˈkænd(ə)l"
+        "ipa": "/ˈkænd(ə)l/"
       },
       {
-        "unit": 2,
+        "no": 90,
+        "unit": 4,
+        "en": "please",
+        "cn": "请",
+        "ipa": "/pliːz/"
+      },
+      {
+        "no": 91,
+        "unit": 4,
+        "en": "at",
+        "cn": "在(某处);在(几点钟)",
+        "ipa": "/æt; ət/"
+      },
+      {
+        "no": 92,
+        "unit": 4,
+        "en": "school",
+        "cn": "学校",
+        "ipa": "/skuːl/"
+      },
+      {
+        "no": 93,
+        "unit": 4,
+        "en": "gate",
+        "cn": "大门",
+        "ipa": "/ɡeɪt/"
+      },
+      {
+        "no": 94,
+        "unit": 4,
+        "en": "hi",
+        "cn": "你好",
+        "ipa": "/haɪ/"
+      },
+      {
+        "no": 95,
+        "unit": 4,
+        "en": "my",
+        "cn": "我的",
+        "ipa": "/maɪ/"
+      },
+      {
+        "no": 96,
+        "unit": 4,
+        "en": "cat",
+        "cn": "猫",
+        "ipa": "/kæt/"
+      },
+      {
+        "no": 97,
+        "unit": 4,
+        "en": "dog",
+        "cn": "狗",
+        "ipa": "/dɒɡ/"
+      },
+      {
+        "no": 98,
+        "unit": 4,
+        "en": "how",
+        "cn": "怎样;多少;多么",
+        "ipa": "/haʊ/"
+      },
+      {
+        "no": 99,
+        "unit": 4,
+        "en": "are",
+        "cn": "是",
+        "ipa": "/ɑː(r); ə(r)/"
+      },
+      {
+        "no": 100,
+        "unit": 4,
+        "en": "home",
+        "cn": "家",
+        "ipa": "/həʊm/"
+      },
+      {
+        "no": 101,
+        "unit": 5,
+        "en": "good",
+        "cn": "好的",
+        "ipa": "/ɡʊd/"
+      },
+      {
+        "no": 102,
+        "unit": 5,
+        "en": "morning",
+        "cn": "早晨;上午",
+        "ipa": "/ˈmɔːnɪŋ/"
+      },
+      {
+        "no": 103,
+        "unit": 5,
+        "en": "mom",
+        "cn": "妈妈",
+        "ipa": "/mɒm/"
+      },
+      {
+        "no": 104,
+        "unit": 5,
+        "en": "woof",
+        "cn": "(狗叫声)汪!",
+        "ipa": "/wʊf/"
+      },
+      {
+        "no": 105,
+        "unit": 5,
+        "en": "fine",
+        "cn": "健康的;晴朗的",
+        "ipa": "/faɪn/"
+      },
+      {
+        "no": 106,
+        "unit": 5,
+        "en": "thank",
+        "cn": "谢谢",
+        "ipa": "/θæŋk/"
+      },
+      {
+        "no": 107,
+        "unit": 5,
+        "en": "afternoon",
+        "cn": "下午",
+        "ipa": "/ˌɑːftəˈnuːn/"
+      },
+      {
+        "no": 108,
+        "unit": 5,
+        "en": "egg",
+        "cn": "蛋",
+        "ipa": "/eɡ/"
+      },
+      {
+        "no": 109,
+        "unit": 5,
+        "en": "fish",
+        "cn": "鱼;鱼肉",
+        "ipa": "/fɪʃ/"
+      },
+      {
+        "no": 110,
+        "unit": 5,
+        "en": "have",
+        "cn": "有;吃,喝",
+        "ipa": "/hæv; həv/"
+      },
+      {
+        "no": 111,
+        "unit": 5,
+        "en": "day",
+        "cn": "(一)天;(一)日",
+        "ipa": "/deɪ/"
+      },
+      {
+        "no": 112,
+        "unit": 5,
+        "en": "street",
+        "cn": "大街;街道",
+        "ipa": "/striːt/"
+      },
+      {
+        "no": 113,
+        "unit": 5,
+        "en": "this",
+        "cn": "这个",
+        "ipa": "/ðɪs/"
+      },
+      {
+        "no": 114,
+        "unit": 5,
+        "en": "goodbye",
+        "cn": "再见",
+        "ipa": "/ˌɡʊdˈbaɪ/"
+      },
+      {
+        "no": 115,
+        "unit": 5,
+        "en": "many",
+        "cn": "许多的",
+        "ipa": "/ˈmeni/"
+      },
+      {
+        "no": 116,
+        "unit": 5,
+        "en": "really",
+        "cn": "(表示惊奇;兴趣;怀疑等)当真;真正地",
+        "ipa": "/ˈriːəli/"
+      },
+      {
+        "no": 117,
+        "unit": 5,
+        "en": "yes",
+        "cn": "是,是的;同意",
+        "ipa": "/jes/"
+      },
+      {
+        "no": 118,
+        "unit": 5,
+        "en": "that",
+        "cn": "那;那个",
+        "ipa": "/ðæt/"
+      },
+      {
+        "no": 119,
+        "unit": 5,
+        "en": "that's=that is",
+        "cn": "那是",
+        "ipa": "/ðæt/"
+      },
+      {
+        "no": 120,
+        "unit": 5,
+        "en": "right",
+        "cn": "正确的;右边的",
+        "ipa": "/raɪt/"
+      },
+      {
+        "no": 121,
+        "unit": 5,
+        "en": "kite",
+        "cn": "风筝",
+        "ipa": "/kaɪt/"
+      },
+      {
+        "no": 122,
+        "unit": 5,
+        "en": "lion",
+        "cn": "狮子",
+        "ipa": "/ˈlaɪən/"
+      },
+      {
+        "no": 123,
+        "unit": 5,
+        "en": "how old",
+        "cn": "多大(年龄)",
+        "ipa": "/haʊ əʊld/"
+      },
+      {
+        "no": 124,
+        "unit": 5,
+        "en": "go",
+        "cn": "去;走",
+        "ipa": "/ɡəʊ/"
+      },
+      {
+        "no": 125,
+        "unit": 5,
+        "en": "old",
+        "cn": "......岁;年老的;陈旧的",
+        "ipa": "/əʊld/"
+      },
+      {
+        "no": 126,
+        "unit": 6,
+        "en": "year",
+        "cn": "年",
+        "ipa": "/jɪə(r)/"
+      },
+      {
+        "no": 127,
+        "unit": 6,
+        "en": "oh",
+        "cn": "啊,呀",
+        "ipa": "/əʊ/"
+      },
+      {
+        "no": 128,
+        "unit": 6,
+        "en": "sorry",
+        "cn": "对不起,抱歉",
+        "ipa": "/ˈsɒri/"
+      },
+      {
+        "no": 129,
+        "unit": 6,
+        "en": "how about",
+        "cn": "怎么样",
+        "ipa": "/haʊəˈbaʊt/"
+      },
+      {
+        "no": 130,
+        "unit": 6,
+        "en": "yeah",
+        "cn": "是的",
+        "ipa": "/jeə/"
+      },
+      {
+        "no": 131,
+        "unit": 6,
+        "en": "monkey",
+        "cn": "猴子",
+        "ipa": "/ˈmʌŋki/"
+      },
+      {
+        "no": 132,
+        "unit": 6,
+        "en": "noodle",
+        "cn": "面条",
+        "ipa": "/ˈnuːd(ə)l/"
+      },
+      {
+        "no": 133,
+        "unit": 6,
+        "en": "phone",
+        "cn": "电话",
+        "ipa": "/fəʊn/"
+      },
+      {
+        "no": 134,
+        "unit": 6,
+        "en": "it",
+        "cn": "它",
+        "ipa": "/ɪt/"
+      },
+      {
+        "no": 135,
+        "unit": 6,
+        "en": "it's=it is",
+        "cn": "它是",
+        "ipa": "/ɪts/"
+      },
+      {
+        "no": 136,
+        "unit": 6,
+        "en": "pet",
+        "cn": "宠物",
+        "ipa": "/pet/"
+      },
+      {
+        "no": 137,
+        "unit": 6,
+        "en": "orange",
+        "cn": "橙子;橙色;橙色的",
+        "ipa": "/ˈɒrɪndʒ/"
+      },
+      {
+        "no": 138,
+        "unit": 6,
+        "en": "pig",
+        "cn": "猪",
+        "ipa": "/pɪɡ/"
+      },
+      {
+        "no": 139,
+        "unit": 6,
+        "en": "color",
+        "cn": "颜色;给......着色",
+        "ipa": "/ˈkʌlə(r)/"
+      },
+      {
+        "no": 140,
+        "unit": 6,
+        "en": "around",
+        "cn": "围绕",
+        "ipa": "/əˈraʊnd/"
+      },
+      {
+        "no": 141,
+        "unit": 6,
+        "en": "ruler",
+        "cn": "尺子",
+        "ipa": "/ˈruːlə(r)/"
+      },
+      {
+        "no": 142,
+        "unit": 6,
+        "en": "book",
+        "cn": "书",
+        "ipa": "/bʊk/"
+      },
+      {
+        "no": 143,
+        "unit": 6,
+        "en": "eraser",
+        "cn": "橡皮擦",
+        "ipa": "/ɪˈreɪzə(r)/"
+      },
+      {
+        "no": 144,
+        "unit": 6,
+        "en": "umbrella",
+        "cn": "雨伞",
+        "ipa": "/ʌmˈbrelə/"
+      },
+      {
+        "no": 145,
+        "unit": 6,
+        "en": "violin",
+        "cn": "小提琴",
+        "ipa": "/ˌvaɪəˈlɪn/"
+      },
+      {
+        "no": 146,
+        "unit": 6,
+        "en": "they",
+        "cn": "他们;她们;它们",
+        "ipa": "/ðeɪ/"
+      },
+      {
+        "no": 147,
+        "unit": 6,
+        "en": "colorful",
+        "cn": "多彩的",
+        "ipa": "/ˈkʌləf(ə)l/"
+      },
+      {
+        "no": 148,
+        "unit": 6,
+        "en": "flower",
+        "cn": "花",
+        "ipa": "/ˈflaʊə(r)/"
+      },
+      {
+        "no": 149,
+        "unit": 6,
+        "en": "after",
+        "cn": "在......之后",
+        "ipa": "/ˈɑːftə(r)/"
+      },
+      {
+        "no": 150,
+        "unit": 6,
+        "en": "step",
+        "cn": "步骤;脚步",
+        "ipa": "/step/"
+      },
+      {
+        "no": 151,
+        "unit": 7,
+        "en": "draw",
+        "cn": "画画",
+        "ipa": "/drɔː/"
+      },
+      {
+        "no": 152,
+        "unit": 7,
+        "en": "cut",
+        "cn": "剪;切",
+        "ipa": "/kʌt/"
+      },
+      {
+        "no": 153,
+        "unit": 7,
+        "en": "make",
+        "cn": "制作;使变得",
+        "ipa": "/meɪk/"
+      },
+      {
+        "no": 154,
+        "unit": 7,
+        "en": "window",
+        "cn": "窗户",
+        "ipa": "/ˈwɪndəʊ/"
+      },
+      {
+        "no": 155,
+        "unit": 7,
+        "en": "X-ray",
+        "cn": "X光",
+        "ipa": "/ˈeks reɪ/"
+      },
+      {
+        "no": 156,
+        "unit": 7,
+        "en": "love",
+        "cn": "爱;喜爱",
+        "ipa": "/lʌv/"
+      },
+      {
+        "no": 157,
+        "unit": 7,
+        "en": "family",
+        "cn": "家庭",
+        "ipa": "/ˈfæməli/"
+      },
+      {
+        "no": 158,
+        "unit": 7,
+        "en": "father",
+        "cn": "父亲;爸爸",
+        "ipa": "/ˈfɑːðə(r)/"
+      },
+      {
+        "no": 159,
+        "unit": 7,
+        "en": "brother",
+        "cn": "哥哥;弟弟",
+        "ipa": "/ˈbrʌðə(r)/"
+      },
+      {
+        "no": 160,
+        "unit": 7,
+        "en": "sister",
+        "cn": "姐姐;妹妹",
+        "ipa": "/ˈsɪstə(r)/"
+      },
+      {
+        "no": 161,
+        "unit": 7,
+        "en": "welcome",
+        "cn": "欢迎",
+        "ipa": "/ˈwelkəm/"
+      },
+      {
+        "no": 162,
+        "unit": 7,
+        "en": "mother",
+        "cn": "母亲;妈妈",
+        "ipa": "/ˈmʌðə(r)/"
+      },
+      {
+        "no": 163,
+        "unit": 7,
+        "en": "here",
+        "cn": "这里",
+        "ipa": "/hɪə(r)/"
+      },
+      {
+        "no": 164,
+        "unit": 7,
+        "en": "cake",
+        "cn": "蛋糕",
+        "ipa": "/keɪk/"
+      },
+      {
+        "no": 165,
+        "unit": 7,
+        "en": "zoo",
+        "cn": "动物园",
+        "ipa": "/zuː/"
+      },
+      {
+        "no": 166,
+        "unit": 7,
+        "en": "who",
+        "cn": "谁",
+        "ipa": "/huː/"
+      },
+      {
+        "no": 167,
+        "unit": 7,
+        "en": "photo",
+        "cn": "照片",
+        "ipa": "/ˈfəʊtəʊ/"
+      },
+      {
+        "no": 168,
+        "unit": 7,
+        "en": "so",
+        "cn": "如此,这么;所以",
+        "ipa": "/səʊ/"
+      },
+      {
+        "no": 169,
+        "unit": 7,
+        "en": "cute",
+        "cn": "可爱的",
+        "ipa": "/kjuːt/"
+      },
+      {
+        "no": 170,
+        "unit": 7,
+        "en": "doctor",
+        "cn": "医生",
+        "ipa": "/ˈdɒktə(r)/"
+      },
+      {
+        "no": 171,
+        "unit": 7,
+        "en": "English",
+        "cn": "英语;英语的;英国人的",
+        "ipa": "/ˈɪŋɡlɪʃ/"
+      },
+      {
+        "no": 172,
+        "unit": 7,
+        "en": "farmer",
+        "cn": "农民",
+        "ipa": "/ˈfɑːmə(r)/"
+      },
+      {
+        "no": 173,
+        "unit": 7,
+        "en": "cook",
+        "cn": "厨师;煮",
+        "ipa": "/kʊk/"
+      },
+      {
+        "no": 174,
+        "unit": 7,
+        "en": "uncle",
+        "cn": "叔;伯;姨夫",
+        "ipa": "/ˈʌŋk(ə)l/"
+      },
+      {
+        "no": 175,
+        "unit": 7,
+        "en": "worker",
+        "cn": "工人",
+        "ipa": "/ˈwɜːkə(r)/"
+      },
+      {
+        "no": 176,
+        "unit": 8,
+        "en": "aunt",
+        "cn": "婶母;伯母;姨母",
+        "ipa": "/ɑːnt/"
+      },
+      {
+        "no": 177,
+        "unit": 8,
+        "en": "nurse",
+        "cn": "护士",
+        "ipa": "/nɜːs/"
+      },
+      {
+        "no": 178,
+        "unit": 8,
         "en": "big",
         "cn": "大的",
-        "ipa": "bɪɡ"
-      }
-    ]
-  },
-  {
-    "semester": "五年级上册",
-    "words": [
-      {
-        "unit": 1,
-        "en": "weather",
-        "cn": "天气",
-        "ipa": "ˈweðə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "night",
-        "cn": "夜晚;晚上",
-        "ipa": "naɪt"
-      },
-      {
-        "unit": 1,
-        "en": "different",
-        "cn": "不同的",
-        "ipa": "ˈdɪfrənt"
-      },
-      {
-        "unit": 2,
-        "en": "short",
-        "cn": "短的;个子矮的",
-        "ipa": "ʃɔːt"
-      },
-      {
-        "unit": 1,
-        "en": "season",
-        "cn": "季节",
-        "ipa": "ˈsiːz(ə)n"
-      },
-      {
-        "unit": 2,
-        "en": "sunglasses",
-        "cn": "墨镜;太阳镜",
-        "ipa": "ˈsʌnɡlɑːsɪz"
-      },
-      {
-        "unit": 1,
-        "en": "spring",
-        "cn": "春天",
-        "ipa": "sprɪŋ"
-      },
-      {
-        "unit": 2,
-        "en": "outing",
-        "cn": "出外游玩;远足",
-        "ipa": "ˈaʊtɪŋ"
-      },
-      {
-        "unit": 1,
-        "en": "autumn",
-        "cn": "秋天",
-        "ipa": "ˈɔːtəm"
-      },
-      {
-        "unit": 2,
-        "en": "coat",
-        "cn": "外套;大衣",
-        "ipa": "kəʊt"
-      },
-      {
-        "unit": 1,
-        "en": "winter",
-        "cn": "冬天",
-        "ipa": "ˈwɪntə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "snowman",
-        "cn": "雪人",
-        "ipa": "ˈsnəʊmæn"
-      },
-      {
-        "unit": 1,
-        "en": "warm",
-        "cn": "温暖的",
-        "ipa": "wɔːm"
-      },
-      {
-        "unit": 2,
-        "en": "change",
-        "cn": "改变;变化",
-        "ipa": "tʃeɪndʒ"
-      },
-      {
-        "unit": 1,
-        "en": "sunny",
-        "cn": "阳光充足的",
-        "ipa": "ˈsʌni"
-      },
-      {
-        "unit": 2,
-        "en": "email",
-        "cn": "电子邮件",
-        "ipa": "ˈiːmeɪl"
-      },
-      {
-        "unit": 1,
-        "en": "hot",
-        "cn": "热的",
-        "ipa": "hɒt"
-      },
-      {
-        "unit": 2,
-        "en": "grandparent",
-        "cn": "(外)祖父;(外)祖母",
-        "ipa": "ˈɡrænpeərənt"
-      },
-      {
-        "unit": 1,
-        "en": "know",
-        "cn": "知道;了解",
-        "ipa": "nəʊ"
-      },
-      {
-        "unit": 2,
-        "en": "something",
-        "cn": "某事;某物",
-        "ipa": "ˈsʌmθɪŋ"
-      },
-      {
-        "unit": 2,
-        "en": "36",
-        "cn": "干得好",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "snow",
-        "cn": "雪",
-        "ipa": "snəʊ"
-      },
-      {
-        "unit": 2,
-        "en": "then",
-        "cn": "接着;然后",
-        "ipa": "ðen"
-      },
-      {
-        "unit": 1,
-        "en": "snow",
-        "cn": "下雪",
-        "ipa": "snəʊ"
-      },
-      {
-        "unit": 2,
-        "en": "out",
-        "cn": "(从...里)出来",
-        "ipa": "aʊt"
-      },
-      {
-        "unit": 1,
-        "en": "skate",
-        "cn": "滑冰;溜冰",
-        "ipa": "skeɪt"
-      },
-      {
-        "unit": 2,
-        "en": "take off",
-        "cn": "脱下;脱掉(衣物);起飞",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "call",
-        "cn": "呼叫;打电话",
-        "ipa": "kɔːl"
-      },
-      {
-        "unit": 2,
-        "en": "again",
-        "cn": "又一次;再一次",
-        "ipa": "əˈɡen"
-      },
-      {
-        "unit": 1,
-        "en": "cloudy",
-        "cn": "阴天的;多云的",
-        "ipa": "ˈklaʊdi"
-      },
-      {
-        "unit": 2,
-        "en": "month",
-        "cn": "月",
-        "ipa": "mʌnθ"
-      },
-      {
-        "unit": 1,
-        "en": "snowy",
-        "cn": "多雪的;下雪的",
-        "ipa": "ˈsnəʊi"
-      },
-      {
-        "unit": 2,
-        "en": "Mount Wuyi",
-        "cn": "武夷山",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "inside",
-        "cn": "在...内;在...里",
-        "ipa": "ˌɪnˈsaɪd"
-      },
-      {
-        "unit": 2,
-        "en": "October",
-        "cn": "十月",
-        "ipa": "ɒkˈtəʊbə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "windy",
-        "cn": "多风的;风大的",
-        "ipa": "ˈwɪndi"
-      },
-      {
-        "unit": 2,
-        "en": "plan",
-        "cn": "计划",
-        "ipa": "plæn"
-      },
-      {
-        "unit": 1,
-        "en": "rainy",
-        "cn": "多雨的",
-        "ipa": "ˈreɪni"
-      },
-      {
-        "unit": 2,
-        "en": "National Day",
-        "cn": "国庆节",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "46",
-        "cn": "保重;照顾",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "rain",
-        "cn": "雨",
-        "ipa": "reɪn"
-      },
-      {
-        "unit": 2,
-        "en": "river",
-        "cn": "河;江",
-        "ipa": "ˈrɪvə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "rain",
-        "cn": "下雨",
-        "ipa": "reɪn"
-      },
-      {
-        "unit": 2,
-        "en": "clear",
-        "cn": "清晰的;透明的",
-        "ipa": "klɪə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "little",
-        "cn": "小的;少量的;不多的",
-        "ipa": "ˈlɪt(ə)l"
-      },
-      {
-        "unit": 2,
-        "en": "sound",
-        "cn": "听起来好像",
-        "ipa": "saʊnd"
-      },
-      {
-        "unit": 1,
-        "en": "sunshine",
-        "cn": "阳光",
-        "ipa": "ˈsʌnʃaɪn"
-      },
-      {
-        "unit": 2,
-        "en": "sound",
-        "cn": "声音",
-        "ipa": "saʊnd"
-      },
-      {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "June",
-        "cn": "六月",
-        "ipa": "dʒuːn"
-      },
-      {
-        "unit": 2,
-        "en": "Tree Planting Day",
-        "cn": "植树节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "July",
-        "cn": "七月",
-        "ipa": "dʒʊˈlaɪ"
-      },
-      {
-        "unit": 2,
-        "en": "plant",
-        "cn": "种植",
-        "ipa": "plɑːnt"
-      },
-      {
-        "unit": 1,
-        "en": "August",
-        "cn": "八月",
-        "ipa": "ˈɔːɡəst"
-      },
-      {
-        "unit": 2,
-        "en": "plant",
-        "cn": "植物",
-        "ipa": "plɑːnt"
-      },
-      {
-        "unit": 1,
-        "en": "September",
-        "cn": "九月",
-        "ipa": "sepˈtembə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "Children's Day",
-        "cn": "儿童节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "November",
-        "cn": "十一月",
-        "ipa": "nəʊˈvembə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "children",
-        "cn": "儿童;小孩",
-        "ipa": "ˈtʃɪldrən"
-      },
-      {
-        "unit": 1,
-        "en": "more",
-        "cn": "更多的;更大的",
-        "ipa": "mɔː(r)"
-      },
-      {
-        "unit": 2,
-        "en": "Teachers' Day",
-        "cn": "教师节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "December",
-        "cn": "十二月",
-        "ipa": "dɪˈsembə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "flag-raising",
-        "cn": "升旗",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "January",
-        "cn": "一月",
-        "ipa": "ˈdʒænjuəri"
-      },
-      {
-        "unit": 2,
-        "en": "motherland",
-        "cn": "祖国",
-        "ipa": "ˈmʌðəlænd"
-      },
-      {
-        "unit": 1,
-        "en": "or",
-        "cn": "或者",
-        "ipa": "ɔː(r)"
-      },
-      {
-        "unit": 2,
-        "en": "date",
-        "cn": "日期",
-        "ipa": "deɪt"
-      },
-      {
-        "unit": 1,
-        "en": "February",
-        "cn": "二月",
-        "ipa": "ˈfebruəri"
-      },
-      {
-        "unit": 2,
-        "en": "celebrate",
-        "cn": "庆祝",
-        "ipa": "ˈselɪbreɪt"
-      },
-      {
-        "unit": 1,
-        "en": "March",
-        "cn": "三月",
-        "ipa": "mɑːtʃ"
-      },
-      {
-        "unit": 2,
-        "en": "difficult",
-        "cn": "困难的",
-        "ipa": "ˈdɪfɪkəlt"
-      },
-      {
-        "unit": 1,
-        "en": "May",
-        "cn": "五月",
-        "ipa": "meɪ"
-      },
-      {
-        "unit": 2,
-        "en": "find",
-        "cn": "发现;找到",
-        "ipa": "faɪnd"
-      },
-      {
-        "unit": 1,
-        "en": "April",
-        "cn": "四月",
-        "ipa": "ˈeɪprəl"
-      },
-      {
-        "unit": 2,
-        "en": "calendar",
-        "cn": "日历",
-        "ipa": "ˈkælɪndə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "90",
-        "cn": "劳动节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "easy",
-        "cn": "容易的",
-        "ipa": "ˈiːzi"
-      },
-      {
-        "unit": 2,
-        "en": "give",
-        "cn": "交给;赠送;提供",
-        "ipa": "ɡɪv"
-      },
-      {
-        "unit": 1,
-        "en": "remember",
-        "cn": "记住",
-        "ipa": "rɪˈmembə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "paper",
-        "cn": "纸",
-        "ipa": "ˈpeɪpə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "place",
-        "cn": "地方",
-        "ipa": "pleɪs"
-      },
-      {
-        "unit": 2,
-        "en": "hug",
-        "cn": "拥抱",
-        "ipa": "hʌɡ"
-      },
-      {
-        "unit": 1,
-        "en": "trip",
-        "cn": "旅行;出行",
-        "ipa": "trɪp"
-      },
-      {
-        "unit": 2,
-        "en": "lost",
-        "cn": "迷路的;丢失的",
-        "ipa": "lɒst"
-      },
-      {
-        "unit": 1,
-        "en": "start",
-        "cn": "开始",
-        "ipa": "stɑːt"
-      },
-      {
-        "unit": 2,
-        "en": "write",
-        "cn": "书写;写字",
-        "ipa": "raɪt"
-      },
-      {
-        "unit": 1,
-        "en": "cheer",
-        "cn": "欢呼;加油",
-        "ipa": "tʃɪə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "letter",
-        "cn": "信;字母",
-        "ipa": "ˈletə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "97",
-        "cn": "终于;最终",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "back",
-        "cn": "回原处;恢复原状",
-        "ipa": "bæk"
-      },
-      {
-        "unit": 2,
-        "en": "the West Lake",
-        "cn": "西湖",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "99",
-        "cn": "元旦",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "first",
-        "cn": "第一;第一次",
-        "ipa": "fɜːst"
-      },
-      {
-        "unit": 2,
-        "en": "its",
-        "cn": "它的",
-        "ipa": "ɪts"
-      },
-      {
-        "unit": 1,
-        "en": "usually",
-        "cn": "通常",
-        "ipa": "ˈjuːʒuəli; ˈjuːʒəli"
-      },
-      {
-        "unit": 2,
-        "en": "amazing",
-        "cn": "令人惊叹的",
-        "ipa": "əˈmeɪzɪŋ"
-      },
-      {
-        "unit": 1,
-        "en": "hometown",
-        "cn": "家乡",
-        "ipa": "ˈhəʊmtaʊn"
-      },
-      {
-        "unit": 2,
-        "en": "sight",
-        "cn": "名胜;风景",
-        "ipa": "saɪt"
-      },
-      {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "123",
-        "cn": "例如",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "pagoda",
-        "cn": "塔;宝塔",
-        "ipa": "pəˈɡəʊdə"
-      },
-      {
-        "unit": 2,
-        "en": "study",
-        "cn": "学习",
-        "ipa": "ˈstʌdi"
-      },
-      {
-        "unit": 1,
-        "en": "village",
-        "cn": "乡村",
-        "ipa": "ˈvɪlɪdʒ"
-      },
-      {
-        "unit": 2,
-        "en": "study",
-        "cn": "书房",
-        "ipa": "ˈstʌdi"
-      },
-      {
-        "unit": 1,
-        "en": "tea",
-        "cn": "茶",
-        "ipa": "tiː"
-      },
-      {
-        "unit": 2,
-        "en": "space",
-        "cn": "空间;太空",
-        "ipa": "speɪs"
-      },
-      {
-        "unit": 1,
-        "en": "delicious",
-        "cn": "美味的",
-        "ipa": "dɪˈlɪʃəs"
-      },
-      {
-        "unit": 2,
-        "en": "grow",
-        "cn": "种植;生长",
-        "ipa": "ɡrəʊ"
-      },
-      {
-        "unit": 1,
-        "en": "dream",
-        "cn": "梦想",
-        "ipa": "driːm"
-      },
-      {
-        "unit": 2,
-        "en": "Mrs.",
-        "cn": "太太;夫人",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "dream",
-        "cn": "做梦",
-        "ipa": "driːm"
-      },
-      {
-        "unit": 2,
-        "en": "restaurant",
-        "cn": "餐馆;餐厅",
-        "ipa": "ˈrestrɒnt"
-      },
-      {
-        "unit": 1,
-        "en": "man",
-        "cn": "男人;人类",
-        "ipa": "mæn"
-      },
-      {
-        "unit": 2,
-        "en": "scientist",
-        "cn": "科学家",
-        "ipa": "ˈsaɪəntɪst"
-      },
-      {
-        "unit": 1,
-        "en": "fireman",
-        "cn": "消防队员",
-        "ipa": "ˈfaɪəmən"
-      },
-      {
-        "unit": 2,
-        "en": "lab",
-        "cn": "实验室",
-        "ipa": "læb"
-      },
-      {
-        "unit": 1,
-        "en": "fire",
-        "cn": "火;开火",
-        "ipa": "ˈfaɪə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "early",
-        "cn": "早的;早到的",
-        "ipa": "ˈɜːli"
-      },
-      {
-        "unit": 1,
-        "en": "keep",
-        "cn": "保持;继续",
-        "ipa": "kiːp"
-      },
-      {
-        "unit": 2,
-        "en": "late",
-        "cn": "迟;晚",
-        "ipa": "leɪt"
-      },
-      {
-        "unit": 1,
-        "en": "safe",
-        "cn": "安全的",
-        "ipa": "seɪf"
-      },
-      {
-        "unit": 2,
-        "en": "storyteller",
-        "cn": "讲故事的人",
-        "ipa": "ˈstɔːritelə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "woman",
-        "cn": "成年女子;妇女",
-        "ipa": "ˈwʊmən"
-      },
-      {
-        "unit": 2,
-        "en": "the USA",
-        "cn": "美国",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "hard",
-        "cn": "努力地",
-        "ipa": "hɑːd"
-      },
-      {
-        "unit": 2,
-        "en": "culture",
-        "cn": "文化",
-        "ipa": "ˈkʌltʃə(r)"
-      },
-      {
-        "unit": 1,
-        "en": "hard",
-        "cn": "硬的,困难的",
-        "ipa": "hɑːd"
-      },
-      {
-        "unit": 2,
-        "en": "world",
-        "cn": "世界",
-        "ipa": "wɜːld"
-      },
-      {
-        "unit": 1,
-        "en": "patient",
-        "cn": "病人",
-        "ipa": "ˈpeɪʃ(ə)nt"
-      },
-      {
-        "unit": 2,
-        "en": "Beijing roast duck",
-        "cn": "北京烤鸭",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "patient",
-        "cn": "有耐心的",
-        "ipa": "ˈpeɪʃ(ə)nt"
-      },
-      {
-        "unit": 2,
-        "en": "hot pot",
-        "cn": "火锅",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "140",
-        "cn": "警察",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "player",
-        "cn": "运动员",
-        "ipa": "ˈpleɪə(r)"
-      },
-      {
-        "unit": 2,
-        "en": "the Great Wall",
-        "cn": "长城",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
-        "en": "strong",
-        "cn": "强壮的",
-        "ipa": "strɒŋ"
-      },
-      {
-        "unit": 2,
-        "en": "the Yellow River",
-        "cn": "黄河",
-        "ipa": ""
+        "ipa": "/bɪɡ/"
       }
     ]
   },
@@ -3885,796 +1534,949 @@ const allData = [
     "semester": "三年级下册",
     "words": [
       {
+        "no": 1,
         "unit": 1,
         "en": "our",
         "cn": "我们的",
-        "ipa": "ˈaʊə(r)"
+        "ipa": "/ˈaʊə(r)/"
       },
       {
-        "unit": 2,
-        "en": "grass",
-        "cn": "草",
-        "ipa": "ɡrɑːs"
-      },
-      {
+        "no": 2,
         "unit": 1,
         "en": "animal",
         "cn": "动物",
-        "ipa": "ˈænɪm(ə)l"
+        "ipa": "/ˈænɪm(ə)l/"
       },
       {
-        "unit": 2,
-        "en": "ride",
-        "cn": "骑",
-        "ipa": "raɪd"
-      },
-      {
+        "no": 3,
         "unit": 1,
         "en": "bear",
         "cn": "熊",
-        "ipa": "beə(r)"
+        "ipa": "/beə(r)/"
       },
       {
-        "unit": 2,
-        "en": "cool",
-        "cn": "酷的;凉爽的",
-        "ipa": "kuːl"
-      },
-      {
+        "no": 4,
         "unit": 1,
         "en": "horse",
         "cn": "马",
-        "ipa": "hɔːs"
+        "ipa": "/hɔːs/"
       },
       {
-        "unit": 2,
-        "en": "face",
-        "cn": "脸",
-        "ipa": "feɪs"
-      },
-      {
+        "no": 5,
         "unit": 1,
         "en": "can",
         "cn": "能;会",
-        "ipa": "kæn; kən"
+        "ipa": "/kæn; kən/"
       },
       {
-        "unit": 2,
-        "en": "guess",
-        "cn": "猜",
-        "ipa": "ɡes"
-      },
-      {
+        "no": 6,
         "unit": 1,
         "en": "run",
         "cn": "跑",
-        "ipa": "rʌn"
+        "ipa": "/rʌn/"
       },
       {
-        "unit": 2,
-        "en": "jump",
-        "cn": "跳",
-        "ipa": "dʒʌmp"
-      },
-      {
+        "no": 7,
         "unit": 1,
         "en": "fast",
         "cn": "快速地;快的",
-        "ipa": "fɑːst"
+        "ipa": "/fɑːst/"
       },
       {
-        "unit": 2,
-        "en": "mouth",
-        "cn": "嘴巴",
-        "ipa": "maʊθ"
-      },
-      {
+        "no": 8,
         "unit": 1,
         "en": "bird",
         "cn": "鸟",
-        "ipa": "bɜːd"
+        "ipa": "/bɜːd/"
       },
       {
-        "unit": 2,
-        "en": "carrot",
-        "cn": "胡萝卜",
-        "ipa": "ˈkærət"
-      },
-      {
+        "no": 9,
         "unit": 1,
         "en": "beautiful",
         "cn": "美丽的,漂亮的",
-        "ipa": "ˈbjuːtɪf(ə)l"
+        "ipa": "/ˈbjuːtɪf(ə)l/"
       },
       {
-        "unit": 2,
-        "en": "meat",
-        "cn": "肉",
-        "ipa": "miːt"
-      },
-      {
+        "no": 10,
         "unit": 1,
         "en": "panda",
         "cn": "熊猫",
-        "ipa": "ˈpændə"
+        "ipa": "/ˈpændə/"
       },
       {
-        "unit": 2,
-        "en": "no",
-        "cn": "不,不是;没有",
-        "ipa": "nəʊ"
-      },
-      {
+        "no": 11,
         "unit": 1,
         "en": "bag",
         "cn": "包,手提包;袋子",
-        "ipa": "bæɡ"
+        "ipa": "/bæɡ/"
       },
       {
-        "unit": 2,
-        "en": "tiger",
-        "cn": "老虎",
-        "ipa": "ˈtaɪɡə(r)"
-      },
-      {
+        "no": 12,
         "unit": 1,
         "en": "hat",
         "cn": "帽子",
-        "ipa": "hæt"
+        "ipa": "/hæt/"
       },
       {
-        "unit": 2,
-        "en": "Mr.",
-        "cn": "先生",
-        "ipa": ""
-      },
-      {
+        "no": 13,
         "unit": 1,
         "en": "these",
         "cn": "这些",
-        "ipa": "ðiːz"
+        "ipa": "/ðiːz/"
       },
       {
-        "unit": 2,
-        "en": "mouse",
-        "cn": "(复数 mice)老鼠",
-        "ipa": "maʊs"
-      },
-      {
+        "no": 14,
         "unit": 1,
         "en": "small",
         "cn": "小的",
-        "ipa": "smɔːl"
+        "ipa": "/smɔːl/"
       },
       {
-        "unit": 2,
-        "en": "together",
-        "cn": "一起",
-        "ipa": "təˈɡeðə(r)"
-      },
-      {
+        "no": 15,
         "unit": 1,
         "en": "ear",
         "cn": "耳朵",
-        "ipa": "ɪə(r)"
+        "ipa": "/ɪə(r)/"
       },
       {
-        "unit": 2,
-        "en": "nose",
-        "cn": "鼻子",
-        "ipa": "nəʊz"
-      },
-      {
+        "no": 16,
         "unit": 1,
         "en": "eye",
         "cn": "眼睛",
-        "ipa": "aɪ"
+        "ipa": "/aɪ/"
       },
       {
-        "unit": 2,
-        "en": "clothes",
-        "cn": "衣服",
-        "ipa": "kləʊðz"
-      },
-      {
+        "no": 17,
         "unit": 1,
         "en": "baby",
         "cn": "婴儿;幼崽",
-        "ipa": "ˈbeɪbi"
+        "ipa": "/ˈbeɪbi/"
       },
       {
-        "unit": 2,
-        "en": "size",
-        "cn": "尺寸",
-        "ipa": "saɪz"
-      },
-      {
+        "no": 18,
         "unit": 1,
         "en": "lovely",
         "cn": "可爱的",
-        "ipa": "ˈlʌvli"
+        "ipa": "/ˈlʌvli/"
       },
       {
-        "unit": 2,
-        "en": "do",
-        "cn": "(构成否定句、疑问句的助动词,无词义);做",
-        "ipa": "duː; də"
-      },
-      {
+        "no": 19,
         "unit": 1,
         "en": "see",
         "cn": "看;看望",
-        "ipa": "siː"
+        "ipa": "/siː/"
       },
       {
-        "unit": 2,
-        "en": "wear",
-        "cn": "穿;戴",
-        "ipa": "weə(r)"
-      },
-      {
+        "no": 20,
         "unit": 1,
         "en": "all",
         "cn": "全部",
-        "ipa": "ɔːl"
+        "ipa": "/ɔːl/"
       },
       {
-        "unit": 2,
-        "en": "PE",
-        "cn": "体育",
-        "ipa": "peɪ"
-      },
-      {
+        "no": 21,
         "unit": 1,
         "en": "those",
         "cn": "那些",
-        "ipa": "ðəʊz"
+        "ipa": "/ðəʊz/"
       },
       {
-        "unit": 2,
-        "en": "put on",
-        "cn": "穿上",
-        "ipa": ""
-      },
-      {
+        "no": 22,
         "unit": 1,
         "en": "brown",
         "cn": "棕色的;棕色",
-        "ipa": "braʊn"
+        "ipa": "/braʊn/"
       },
       {
-        "unit": 2,
-        "en": "team",
-        "cn": "队",
-        "ipa": "tiːm"
-      },
-      {
+        "no": 23,
         "unit": 1,
         "en": "long",
         "cn": "长的",
-        "ipa": "lɒŋ"
+        "ipa": "/lɒŋ/"
       },
       {
-        "unit": 2,
-        "en": "T-shirt",
-        "cn": "T恤衫",
-        "ipa": "ˈtiː ʃɜːt"
-      },
-      {
+        "no": 24,
         "unit": 1,
         "en": "leg",
         "cn": "腿",
-        "ipa": "leɡ"
+        "ipa": "/leɡ/"
       },
       {
-        "unit": 2,
-        "en": "swim",
-        "cn": "游泳",
-        "ipa": "swɪm"
-      },
-      {
+        "no": 25,
         "unit": 1,
         "en": "like",
         "cn": "喜欢;像",
-        "ipa": "laɪk"
+        "ipa": "/laɪk/"
       },
       {
+        "no": 26,
+        "unit": 2,
+        "en": "grass",
+        "cn": "草",
+        "ipa": "/ɡrɑːs/"
+      },
+      {
+        "no": 27,
+        "unit": 2,
+        "en": "ride",
+        "cn": "骑",
+        "ipa": "/raɪd/"
+      },
+      {
+        "no": 28,
+        "unit": 2,
+        "en": "cool",
+        "cn": "酷的;凉爽的",
+        "ipa": "/kuːl/"
+      },
+      {
+        "no": 29,
+        "unit": 2,
+        "en": "face",
+        "cn": "脸",
+        "ipa": "/feɪs/"
+      },
+      {
+        "no": 30,
+        "unit": 2,
+        "en": "guess",
+        "cn": "猜",
+        "ipa": "/ɡes/"
+      },
+      {
+        "no": 31,
+        "unit": 2,
+        "en": "jump",
+        "cn": "跳",
+        "ipa": "/dʒʌmp/"
+      },
+      {
+        "no": 32,
+        "unit": 2,
+        "en": "mouth",
+        "cn": "嘴巴",
+        "ipa": "/maʊθ/"
+      },
+      {
+        "no": 33,
+        "unit": 2,
+        "en": "carrot",
+        "cn": "胡萝卜",
+        "ipa": "/ˈkærət/"
+      },
+      {
+        "no": 34,
+        "unit": 2,
+        "en": "meat",
+        "cn": "肉",
+        "ipa": "/miːt/"
+      },
+      {
+        "no": 35,
+        "unit": 2,
+        "en": "no",
+        "cn": "不,不是;没有",
+        "ipa": "/nəʊ/"
+      },
+      {
+        "no": 36,
+        "unit": 2,
+        "en": "tiger",
+        "cn": "老虎",
+        "ipa": "/ˈtaɪɡə(r)/"
+      },
+      {
+        "no": 37,
+        "unit": 2,
+        "en": "Mr.",
+        "cn": "先生",
+        "ipa": "/ˈmɪstə(r)/"
+      },
+      {
+        "no": 38,
+        "unit": 2,
+        "en": "mouse",
+        "cn": "(复数 mice)老鼠",
+        "ipa": "/maʊs/"
+      },
+      {
+        "no": 39,
+        "unit": 2,
+        "en": "together",
+        "cn": "一起",
+        "ipa": "/təˈɡeðə(r)/"
+      },
+      {
+        "no": 40,
+        "unit": 2,
+        "en": "nose",
+        "cn": "鼻子",
+        "ipa": "/nəʊz/"
+      },
+      {
+        "no": 41,
+        "unit": 2,
+        "en": "clothes",
+        "cn": "衣服",
+        "ipa": "/kləʊðz/"
+      },
+      {
+        "no": 42,
+        "unit": 2,
+        "en": "size",
+        "cn": "尺寸",
+        "ipa": "/saɪz/"
+      },
+      {
+        "no": 43,
+        "unit": 2,
+        "en": "do",
+        "cn": "(构成否定句、疑问句的助动词,无词义);做",
+        "ipa": "/duː; də/"
+      },
+      {
+        "no": 44,
+        "unit": 2,
+        "en": "wear",
+        "cn": "穿;戴",
+        "ipa": "/weə(r)/"
+      },
+      {
+        "no": 45,
+        "unit": 2,
+        "en": "PE",
+        "cn": "体育",
+        "ipa": "/peɪ/"
+      },
+      {
+        "no": 46,
+        "unit": 2,
+        "en": "put on",
+        "cn": "穿上",
+        "ipa": "/pʊt ɒn/"
+      },
+      {
+        "no": 47,
+        "unit": 2,
+        "en": "team",
+        "cn": "队",
+        "ipa": "/tiːm/"
+      },
+      {
+        "no": 48,
+        "unit": 2,
+        "en": "T-shirt",
+        "cn": "T恤衫",
+        "ipa": "/ˈtiː ʃɜːt/"
+      },
+      {
+        "no": 49,
+        "unit": 2,
+        "en": "swim",
+        "cn": "游泳",
+        "ipa": "/swɪm/"
+      },
+      {
+        "no": 50,
         "unit": 2,
         "en": "whose",
         "cn": "谁的",
-        "ipa": "huːz"
+        "ipa": "/huːz/"
       },
       {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 51,
+        "unit": 3,
         "en": "shirt",
         "cn": "衬衫",
-        "ipa": "ʃɜːt"
+        "ipa": "/ʃɜːt/"
       },
       {
-        "unit": 2,
-        "en": "o'clock",
-        "cn": "(几)点钟",
-        "ipa": "əˈklɒk"
-      },
-      {
-        "unit": 2,
-        "en": "78",
+        "no": 52,
+        "unit": 3,
+        "en": "sports ground",
         "cn": "运动场",
-        "ipa": ""
+        "ipa": "/ˈspɔːts ɡraʊnd/"
       },
       {
-        "unit": 1,
+        "no": 53,
+        "unit": 3,
         "en": "not",
         "cn": "不;没有",
-        "ipa": "nɒt"
+        "ipa": "/nɒt/"
       },
       {
-        "unit": 2,
-        "en": "Tokyo",
-        "cn": "东京",
-        "ipa": "ˈtəʊkiəʊ"
-      },
-      {
-        "unit": 2,
-        "en": "80",
+        "no": 54,
+        "unit": 3,
+        "en": "isn't=is not",
         "cn": "不是",
-        "ipa": ""
+        "ipa": "/ˈɪznt/"
       },
       {
-        "unit": 1,
+        "no": 55,
+        "unit": 3,
         "en": "bike",
         "cn": "自行车",
-        "ipa": "baɪk"
+        "ipa": "/baɪk/"
       },
       {
-        "unit": 2,
-        "en": "Paris",
-        "cn": "巴黎",
-        "ipa": "ˈpærɪs"
-      },
-      {
-        "unit": 1,
+        "no": 56,
+        "unit": 3,
         "en": "where",
         "cn": "哪里",
-        "ipa": "weə(r)"
+        "ipa": "/weə(r)/"
       },
       {
-        "unit": 2,
-        "en": "London",
-        "cn": "伦敦",
-        "ipa": "ˈlʌndən"
-      },
-      {
-        "unit": 1,
+        "no": 57,
+        "unit": 3,
         "en": "sweater",
         "cn": "毛衣",
-        "ipa": "ˈswetə(r)"
+        "ipa": "/ˈswetə(r)/"
       },
       {
-        "unit": 2,
-        "en": "clock",
-        "cn": "钟",
-        "ipa": "klɒk"
-      },
-      {
-        "unit": 1,
+        "no": 58,
+        "unit": 3,
         "en": "room",
         "cn": "房间",
-        "ipa": "ruːm"
+        "ipa": "/ruːm/"
       },
       {
-        "unit": 2,
-        "en": "twelve",
-        "cn": "十二",
-        "ipa": "twelv"
-      },
-      {
-        "unit": 1,
+        "no": 59,
+        "unit": 3,
         "en": "bed",
         "cn": "床",
-        "ipa": "bed"
+        "ipa": "/bed/"
       },
       {
-        "unit": 2,
-        "en": "sun",
-        "cn": "太阳",
-        "ipa": "sʌn"
-      },
-      {
-        "unit": 1,
+        "no": 60,
+        "unit": 3,
         "en": "under",
         "cn": "在...下面",
-        "ipa": "ˈʌndə(r)"
+        "ipa": "/ˈʌndə(r)/"
       },
       {
-        "unit": 2,
-        "en": "push",
-        "cn": "推",
-        "ipa": "pʊʃ"
-      },
-      {
-        "unit": 1,
+        "no": 61,
+        "unit": 3,
         "en": "chair",
         "cn": "椅子",
-        "ipa": "tʃeə(r)"
+        "ipa": "/tʃeə(r)/"
       },
       {
-        "unit": 2,
-        "en": "New York",
-        "cn": "纽约",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 62,
+        "unit": 3,
         "en": "very",
         "cn": "很;非常",
-        "ipa": "ˈveri"
+        "ipa": "/ˈveri/"
       },
       {
-        "unit": 2,
-        "en": "thirty",
-        "cn": "三十",
-        "ipa": "ˈθɜːti"
-      },
-      {
-        "unit": 1,
+        "no": 63,
+        "unit": 3,
         "en": "much",
         "cn": "非常,很;许多",
-        "ipa": "mʌtʃ"
+        "ipa": "/mʌtʃ/"
       },
       {
-        "unit": 2,
-        "en": "a.m.",
-        "cn": "上午",
-        "ipa": ""
-      },
-      {
-        "unit": 2,
-        "en": "90",
+        "no": 64,
+        "unit": 3,
+        "en": "you're=you are",
         "cn": "你是",
-        "ipa": ""
+        "ipa": "/jʊə(r)/"
       },
       {
-        "unit": 1,
+        "no": 65,
+        "unit": 3,
         "en": "dear",
         "cn": "亲爱的",
-        "ipa": "dɪə(r)"
+        "ipa": "/dɪə(r)/"
       },
       {
-        "unit": 2,
-        "en": "read",
-        "cn": "读,阅读",
-        "ipa": "riːd"
-      },
-      {
-        "unit": 2,
-        "en": "92",
+        "no": 66,
+        "unit": 3,
+        "en": "put away",
         "cn": "把某物收拾起来(放好)",
-        "ipa": ""
+        "ipa": "/pʊt əˈweɪ/"
       },
       {
-        "unit": 1,
+        "no": 67,
+        "unit": 3,
         "en": "box",
         "cn": "盒;箱",
-        "ipa": "bɒks"
+        "ipa": "/bɒks/"
       },
       {
-        "unit": 2,
-        "en": "with",
-        "cn": "关于;具有;和;用",
-        "ipa": "wɪð"
-      },
-      {
-        "unit": 1,
+        "no": 68,
+        "unit": 3,
         "en": "sport",
         "cn": "运动",
-        "ipa": "spɔːt"
+        "ipa": "/spɔːt/"
       },
       {
-        "unit": 2,
-        "en": "toy",
-        "cn": "玩具",
-        "ipa": "tɔɪ"
-      },
-      {
-        "unit": 1,
+        "no": 69,
+        "unit": 3,
         "en": "shoe",
         "cn": "鞋",
-        "ipa": "ʃuː"
+        "ipa": "/ʃuː/"
       },
       {
-        "unit": 2,
-        "en": "watch",
-        "cn": "观看",
-        "ipa": "wɒtʃ"
-      },
-      {
-        "unit": 1,
+        "no": 70,
+        "unit": 3,
         "en": "forest",
         "cn": "森林",
-        "ipa": "ˈfɒrɪst"
+        "ipa": "/ˈfɒrɪst/"
       },
       {
-        "unit": 2,
-        "en": "TV",
-        "cn": "电视",
-        "ipa": "ˌtiː ˈviː"
-      },
-      {
-        "unit": 2,
-        "en": "97",
+        "no": 71,
+        "unit": 3,
+        "en": "can't=cannot",
         "cn": "不能;不会",
-        "ipa": ""
+        "ipa": "/kɑːnt/"
       },
       {
-        "unit": 1,
+        "no": 72,
+        "unit": 3,
         "en": "skirt",
         "cn": "裙子",
-        "ipa": "skɜːt"
+        "ipa": "/skɜːt/"
       },
       {
-        "unit": 2,
-        "en": "homework",
-        "cn": "家庭作业",
-        "ipa": "ˈhəʊmwɜːk"
-      },
-      {
-        "unit": 1,
+        "no": 73,
+        "unit": 3,
         "en": "shorts",
         "cn": "短裤",
-        "ipa": "ʃɔːts"
+        "ipa": "/ʃɔːts/"
       },
       {
-        "unit": 2,
-        "en": "dinner",
-        "cn": "正餐;晚餐",
-        "ipa": "ˈdɪnə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 74,
+        "unit": 3,
         "en": "want",
         "cn": "想;想要",
-        "ipa": "wɒnt"
+        "ipa": "/wɒnt/"
       },
       {
-        "unit": 2,
-        "en": "thirteen",
-        "cn": "十三",
-        "ipa": "ˌθɜːˈtiːn"
-      },
-      {
-        "unit": 1,
+        "no": 75,
+        "unit": 3,
         "en": "time",
         "cn": "时间",
-        "ipa": "taɪm"
+        "ipa": "/taɪm/"
       },
       {
-        "unit": 2,
-        "en": "fourteen",
-        "cn": "十四",
-        "ipa": "ˌfɔːˈtiːn"
-      },
-      {
-        "unit": 1,
+        "no": 76,
+        "unit": 4,
         "en": "eleven",
         "cn": "十一",
-        "ipa": "ɪˈlev(ə)n"
+        "ipa": "/ɪˈlev(ə)n/"
       },
       {
-        "unit": 2,
+        "no": 77,
+        "unit": 4,
+        "en": "o'clock",
+        "cn": "(几)点钟",
+        "ipa": "/əˈklɒk/"
+      },
+      {
+        "no": 78,
+        "unit": 4,
+        "en": "hotel",
+        "cn": "旅馆",
+        "ipa": "/həʊˈtel/"
+      },
+      {
+        "no": 79,
+        "unit": 4,
+        "en": "Tokyo",
+        "cn": "东京",
+        "ipa": "/ˈtəʊkiəʊ/"
+      },
+      {
+        "no": 80,
+        "unit": 4,
+        "en": "Moscow",
+        "cn": "莫斯科",
+        "ipa": "/ˈmɒskəʊ/"
+      },
+      {
+        "no": 81,
+        "unit": 4,
+        "en": "Paris",
+        "cn": "巴黎",
+        "ipa": "/ˈpærɪs/"
+      },
+      {
+        "no": 82,
+        "unit": 4,
+        "en": "London",
+        "cn": "伦敦",
+        "ipa": "/ˈlʌndən/"
+      },
+      {
+        "no": 83,
+        "unit": 4,
+        "en": "clock",
+        "cn": "钟",
+        "ipa": "/klɒk/"
+      },
+      {
+        "no": 84,
+        "unit": 4,
+        "en": "twelve",
+        "cn": "十二",
+        "ipa": "/twelv/"
+      },
+      {
+        "no": 85,
+        "unit": 4,
+        "en": "sun",
+        "cn": "太阳",
+        "ipa": "/sʌn/"
+      },
+      {
+        "no": 86,
+        "unit": 4,
+        "en": "push",
+        "cn": "推",
+        "ipa": "/pʊʃ/"
+      },
+      {
+        "no": 87,
+        "unit": 4,
+        "en": "New York",
+        "cn": "纽约",
+        "ipa": "/njuː jɔːk/"
+      },
+      {
+        "no": 88,
+        "unit": 4,
+        "en": "thirty",
+        "cn": "三十",
+        "ipa": "/ˈθɜːti/"
+      },
+      {
+        "no": 89,
+        "unit": 4,
+        "en": "a.m.",
+        "cn": "上午",
+        "ipa": "/ˌeɪ ˈem/"
+      },
+      {
+        "no": 90,
+        "unit": 4,
+        "en": "p.m.",
+        "cn": "下午",
+        "ipa": "/ˌpiː ˈem/"
+      },
+      {
+        "no": 91,
+        "unit": 4,
+        "en": "read",
+        "cn": "读,阅读",
+        "ipa": "/riːd/"
+      },
+      {
+        "no": 92,
+        "unit": 4,
+        "en": "kid",
+        "cn": "孩子",
+        "ipa": "/kɪd/"
+      },
+      {
+        "no": 93,
+        "unit": 4,
+        "en": "with",
+        "cn": "关于;具有;和;用",
+        "ipa": "/wɪð/"
+      },
+      {
+        "no": 94,
+        "unit": 4,
+        "en": "toy",
+        "cn": "玩具",
+        "ipa": "/tɔɪ/"
+      },
+      {
+        "no": 95,
+        "unit": 4,
+        "en": "watch",
+        "cn": "观看",
+        "ipa": "/wɒtʃ/"
+      },
+      {
+        "no": 96,
+        "unit": 4,
+        "en": "TV",
+        "cn": "电视",
+        "ipa": "/ˌtiː ˈviː/"
+      },
+      {
+        "no": 97,
+        "unit": 4,
+        "en": "twenty",
+        "cn": "二十",
+        "ipa": "/ˈtwenti/"
+      },
+      {
+        "no": 98,
+        "unit": 4,
+        "en": "homework",
+        "cn": "家庭作业",
+        "ipa": "/ˈhəʊmwɜːk/"
+      },
+      {
+        "no": 99,
+        "unit": 4,
+        "en": "dinner",
+        "cn": "正餐;晚餐",
+        "ipa": "/ˈdɪnə(r)/"
+      },
+      {
+        "no": 100,
+        "unit": 4,
+        "en": "thirteen",
+        "cn": "十三",
+        "ipa": "/ˌθɜːˈtiːn/"
+      },
+      {
+        "no": 101,
+        "unit": 5,
+        "en": "fourteen",
+        "cn": "十四",
+        "ipa": "/ˌfɔːˈtiːn/"
+      },
+      {
+        "no": 102,
+        "unit": 5,
         "en": "fifteen",
         "cn": "十五",
-        "ipa": "ˌfɪfˈtiːn"
+        "ipa": "/ˌfɪfˈtiːn/"
       },
       {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 103,
+        "unit": 5,
         "en": "sixteen",
         "cn": "十六",
-        "ipa": "ˌsɪksˈtiːn"
+        "ipa": "/ˌsɪksˈtiːn/"
       },
       {
-        "unit": 2,
-        "en": "hamburger",
-        "cn": "汉堡包",
-        "ipa": "ˈhæmbɜːɡə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 104,
+        "unit": 5,
         "en": "seventeen",
         "cn": "十七",
-        "ipa": "ˌsev(ə)nˈtiːn"
+        "ipa": "/ˌsev(ə)nˈtiːn/"
       },
       {
-        "unit": 2,
-        "en": "salad",
-        "cn": "沙拉",
-        "ipa": "ˈsæləd"
-      },
-      {
-        "unit": 1,
+        "no": 105,
+        "unit": 5,
         "en": "eighteen",
         "cn": "十八",
-        "ipa": "ˌeɪˈtiːn"
+        "ipa": "/ˌeɪˈtiːn/"
       },
       {
-        "unit": 2,
-        "en": "drink",
-        "cn": "喝;饮品",
-        "ipa": "drɪŋk"
-      },
-      {
-        "unit": 1,
+        "no": 106,
+        "unit": 5,
         "en": "nineteen",
         "cn": "十九",
-        "ipa": "ˌnaɪnˈtiːn"
+        "ipa": "/ˌnaɪnˈtiːn/"
       },
       {
-        "unit": 2,
-        "en": "help",
-        "cn": "帮助",
-        "ipa": "help"
-      },
-      {
-        "unit": 1,
+        "no": 107,
+        "unit": 5,
         "en": "use",
         "cn": "使用",
-        "ipa": "juːz"
+        "ipa": "/juːz/"
       },
       {
-        "unit": 2,
-        "en": "glass",
-        "cn": "玻璃杯",
-        "ipa": "ɡlɑːs"
-      },
-      {
-        "unit": 1,
+        "no": 108,
+        "unit": 5,
         "en": "picture",
         "cn": "图片",
-        "ipa": "ˈpɪktʃə(r)"
+        "ipa": "/ˈpɪktʃə(r)/"
       },
       {
-        "unit": 2,
-        "en": "of",
-        "cn": "(表示所属、数量、其中)...的",
-        "ipa": "ɒv; əv"
-      },
-      {
-        "unit": 1,
+        "no": 109,
+        "unit": 5,
         "en": "healthy",
         "cn": "健康的",
-        "ipa": "ˈhelθi"
+        "ipa": "/ˈhelθi/"
       },
       {
-        "unit": 2,
-        "en": "favorite",
-        "cn": "最喜欢的",
-        "ipa": "ˈfeɪvərɪt"
-      },
-      {
-        "unit": 1,
+        "no": 110,
+        "unit": 5,
         "en": "eat",
         "cn": "吃",
-        "ipa": "iːt"
+        "ipa": "/iːt/"
       },
       {
-        "unit": 2,
-        "en": "sweet",
-        "cn": "甜的",
-        "ipa": "swiːt"
-      },
-      {
-        "unit": 1,
+        "no": 111,
+        "unit": 5,
         "en": "breakfast",
         "cn": "早餐",
-        "ipa": "ˈbrekfəst"
+        "ipa": "/ˈbrekfəst/"
       },
       {
-        "unit": 2,
-        "en": "fruit",
-        "cn": "水果",
-        "ipa": "fruːt"
-      },
-      {
-        "unit": 1,
+        "no": 112,
+        "unit": 5,
         "en": "hungry",
         "cn": "饥饿的",
-        "ipa": "ˈhʌŋɡri"
+        "ipa": "/ˈhʌŋɡri/"
       },
       {
-        "unit": 2,
-        "en": "Chinese",
-        "cn": "中国的;中国人",
-        "ipa": "ˌtʃaɪˈniːz"
-      },
-      {
-        "unit": 1,
+        "no": 113,
+        "unit": 5,
         "en": "milk",
         "cn": "牛奶",
-        "ipa": "mɪlk"
+        "ipa": "/mɪlk/"
       },
       {
-        "unit": 2,
-        "en": "food",
-        "cn": "食物",
-        "ipa": "fuːd"
-      },
-      {
-        "unit": 1,
+        "no": 114,
+        "unit": 5,
         "en": "bread",
         "cn": "面包",
-        "ipa": "bred"
+        "ipa": "/bred/"
       },
       {
-        "unit": 2,
-        "en": "idea",
-        "cn": "想法,主意",
-        "ipa": "aɪˈdɪə"
-      },
-      {
-        "unit": 1,
+        "no": 115,
+        "unit": 5,
         "en": "today",
         "cn": "今天",
-        "ipa": "təˈdeɪ"
+        "ipa": "/təˈdeɪ/"
       },
       {
-        "unit": 2,
-        "en": "rice",
-        "cn": "米;米饭",
-        "ipa": "raɪs"
-      },
-      {
-        "unit": 1,
+        "no": 116,
+        "unit": 5,
         "en": "about",
         "cn": "关于;大约",
-        "ipa": "əˈbaʊt"
+        "ipa": "/əˈbaʊt/"
       },
       {
-        "unit": 2,
-        "en": "soup",
-        "cn": "汤",
-        "ipa": "suːp"
-      },
-      {
-        "unit": 1,
+        "no": 117,
+        "unit": 5,
         "en": "some",
         "cn": "一些",
-        "ipa": "sʌm; səm"
+        "ipa": "/sʌm; səm/"
       },
       {
-        "unit": 2,
-        "en": "chicken",
-        "cn": "鸡肉;鸡",
-        "ipa": "ˈtʃɪkɪn"
-      },
-      {
-        "unit": 1,
+        "no": 118,
+        "unit": 5,
         "en": "juice",
         "cn": "果汁",
-        "ipa": "dʒuːs"
+        "ipa": "/dʒuːs/"
       },
       {
-        "unit": 2,
-        "en": "vegetable",
-        "cn": "蔬菜",
-        "ipa": "ˈvedʒtəb(ə)l"
-      },
-      {
-        "unit": 1,
+        "no": 119,
+        "unit": 5,
         "en": "lunch",
         "cn": "午餐",
-        "ipa": "lʌntʃ"
+        "ipa": "/lʌntʃ/"
+      },
+      {
+        "no": 120,
+        "unit": 5,
+        "en": "hamburger",
+        "cn": "汉堡包",
+        "ipa": "/ˈhæmbɜːɡə(r)/"
+      },
+      {
+        "no": 121,
+        "unit": 5,
+        "en": "salad",
+        "cn": "沙拉",
+        "ipa": "/ˈsæləd/"
+      },
+      {
+        "no": 122,
+        "unit": 5,
+        "en": "drink",
+        "cn": "喝;饮品",
+        "ipa": "/drɪŋk/"
+      },
+      {
+        "no": 123,
+        "unit": 5,
+        "en": "help",
+        "cn": "帮助",
+        "ipa": "/help/"
+      },
+      {
+        "no": 124,
+        "unit": 5,
+        "en": "glass",
+        "cn": "玻璃杯",
+        "ipa": "/ɡlɑːs/"
+      },
+      {
+        "no": 125,
+        "unit": 5,
+        "en": "of",
+        "cn": "(表示所属、数量、其中)...的",
+        "ipa": "/ɒv; əv/"
+      },
+      {
+        "no": 126,
+        "unit": 6,
+        "en": "favorite",
+        "cn": "最喜欢的",
+        "ipa": "/ˈfeɪvərɪt/"
+      },
+      {
+        "no": 127,
+        "unit": 6,
+        "en": "sweet",
+        "cn": "甜的",
+        "ipa": "/swiːt/"
+      },
+      {
+        "no": 128,
+        "unit": 6,
+        "en": "fruit",
+        "cn": "水果",
+        "ipa": "/fruːt/"
+      },
+      {
+        "no": 129,
+        "unit": 6,
+        "en": "Chinese",
+        "cn": "中国的;中国人",
+        "ipa": "/ˌtʃaɪˈniːz/"
+      },
+      {
+        "no": 130,
+        "unit": 6,
+        "en": "food",
+        "cn": "食物",
+        "ipa": "/fuːd/"
+      },
+      {
+        "no": 131,
+        "unit": 6,
+        "en": "idea",
+        "cn": "想法,主意",
+        "ipa": "/aɪˈdɪə/"
+      },
+      {
+        "no": 132,
+        "unit": 6,
+        "en": "rice",
+        "cn": "米;米饭",
+        "ipa": "/raɪs/"
+      },
+      {
+        "no": 133,
+        "unit": 6,
+        "en": "soup",
+        "cn": "汤",
+        "ipa": "/suːp/"
+      },
+      {
+        "no": 134,
+        "unit": 6,
+        "en": "chicken",
+        "cn": "鸡肉;鸡",
+        "ipa": "/ˈtʃɪkɪn/"
+      },
+      {
+        "no": 135,
+        "unit": 6,
+        "en": "vegetable",
+        "cn": "蔬菜",
+        "ipa": "/ˈvedʒtəb(ə)l/"
       }
     ]
   },
@@ -4682,679 +2484,3773 @@ const allData = [
     "semester": "四年级上册",
     "words": [
       {
+        "no": 1,
         "unit": 1,
         "en": "there",
         "cn": "在那里",
-        "ipa": "ðeə(r)"
+        "ipa": "/ðeə(r)/"
       },
       {
-        "unit": 2,
-        "en": "life",
-        "cn": "生活;生命",
-        "ipa": "laɪf"
-      },
-      {
+        "no": 2,
         "unit": 1,
         "en": "new",
         "cn": "新的",
-        "ipa": "njuː"
+        "ipa": "/njuː/"
       },
       {
-        "unit": 2,
-        "en": "get",
-        "cn": "拿;得到",
-        "ipa": "ɡet"
-      },
-      {
+        "no": 3,
         "unit": 1,
         "en": "student",
         "cn": "学生",
-        "ipa": "ˈstjuːd(ə)nt"
+        "ipa": "/ˈstjuːd(ə)nt/"
       },
       {
-        "unit": 2,
-        "en": "get up",
-        "cn": "起床",
-        "ipa": ""
-      },
-      {
+        "no": 4,
         "unit": 1,
         "en": "computer",
         "cn": "电脑",
-        "ipa": "kəmˈpjuːtə(r)"
+        "ipa": "/kəmˈpjuːtə(r)/"
       },
       {
-        "unit": 2,
-        "en": "bus",
-        "cn": "公共汽车",
-        "ipa": "bʌs"
-      },
-      {
+        "no": 5,
         "unit": 1,
         "en": "library",
         "cn": "图书馆",
-        "ipa": "ˈlaɪbrəri"
+        "ipa": "/ˈlaɪbrəri/"
       },
       {
-        "unit": 2,
-        "en": "full",
-        "cn": "满的;饱的",
-        "ipa": "fʊl"
-      },
-      {
+        "no": 6,
         "unit": 1,
         "en": "which",
         "cn": "哪一个;哪一些",
-        "ipa": "wɪtʃ"
+        "ipa": "/wɪtʃ/"
       },
       {
-        "unit": 2,
-        "en": "into",
-        "cn": "到......里面",
-        "ipa": "ˈɪntuː"
-      },
-      {
+        "no": 7,
         "unit": 1,
         "en": "cousin",
         "cn": "表(堂)兄弟姐妹",
-        "ipa": "ˈkʌzn"
+        "ipa": "/ˈkʌzn/"
       },
       {
-        "unit": 2,
-        "en": "car",
-        "cn": "小汽车;轿车",
-        "ipa": "kɑː(r)"
-      },
-      {
+        "no": 8,
         "unit": 1,
         "en": "grade",
         "cn": "年级",
-        "ipa": "ɡreɪd"
+        "ipa": "/ɡreɪd/"
       },
       {
-        "unit": 2,
-        "en": "when",
-        "cn": "什么时候",
-        "ipa": "wen"
-      },
-      {
+        "no": 9,
         "unit": 1,
         "en": "same",
         "cn": "同一的;相同的",
-        "ipa": "seɪm"
+        "ipa": "/seɪm/"
       },
       {
-        "unit": 2,
-        "en": "football",
-        "cn": "足球",
-        "ipa": "ˈfʊtbɔːl"
-      },
-      {
+        "no": 10,
         "unit": 1,
         "en": "cow",
         "cn": "奶牛",
-        "ipa": "kaʊ"
+        "ipa": "/kaʊ/"
       },
       {
-        "unit": 2,
-        "en": "has",
-        "cn": "(have的第三人称单数形式)有;吃",
-        "ipa": "hæz; həz"
-      },
-      {
+        "no": 11,
         "unit": 1,
         "en": "card",
         "cn": "卡片",
-        "ipa": "kɑːd"
+        "ipa": "/kɑːd/"
       },
       {
-        "unit": 2,
-        "en": "garden",
-        "cn": "花园",
-        "ipa": "ˈɡɑːd(ə)n"
-      },
-      {
+        "no": 12,
         "unit": 1,
         "en": "cold",
         "cn": "寒冷的;冷的",
-        "ipa": "kəʊld"
+        "ipa": "/kəʊld/"
       },
       {
-        "unit": 2,
-        "en": "sweep",
-        "cn": "扫",
-        "ipa": "swiːp"
-      },
-      {
+        "no": 13,
         "unit": 1,
         "en": "blackboard",
         "cn": "黑板",
-        "ipa": "ˈblækbɔːd"
+        "ipa": "/ˈblækbɔːd/"
       },
       {
-        "unit": 2,
-        "en": "floor",
-        "cn": "地板;层",
-        "ipa": "flɔː(r)"
-      },
-      {
+        "no": 14,
         "unit": 1,
         "en": "clean",
         "cn": "干净的;打扫",
-        "ipa": "kliːn"
+        "ipa": "/kliːn/"
       },
       {
-        "unit": 2,
-        "en": "chore",
-        "cn": "家务",
-        "ipa": "tʃɔː(r)"
-      },
-      {
+        "no": 15,
         "unit": 1,
         "en": "bright",
         "cn": "明亮的",
-        "ipa": "braɪt"
+        "ipa": "/braɪt/"
       },
       {
-        "unit": 2,
-        "en": "pick up",
-        "cn": "收拾;拾起",
-        "ipa": ""
-      },
-      {
+        "no": 16,
         "unit": 1,
         "en": "come",
         "cn": "来;到",
-        "ipa": "kʌm"
+        "ipa": "/kʌm/"
       },
       {
-        "unit": 2,
-        "en": "wash",
-        "cn": "洗",
-        "ipa": "wɒʃ"
-      },
-      {
+        "no": 17,
         "unit": 1,
         "en": "desk",
         "cn": "书桌",
-        "ipa": "desk"
+        "ipa": "/desk/"
       },
       {
-        "unit": 2,
-        "en": "toilet",
-        "cn": "卫生间;厕所;坐便器",
-        "ipa": "ˈtɔɪlət"
-      },
-      {
-        "unit": 2,
-        "en": "43",
+        "no": 18,
+        "unit": 1,
+        "en": "Ms.",
         "cn": "(用于已婚或未婚女子姓氏前)女士",
-        "ipa": ""
+        "ipa": "/mɪz/"
       },
       {
+        "no": 19,
         "unit": 1,
         "en": "city",
         "cn": "城市",
-        "ipa": "ˈsɪti"
+        "ipa": "/ˈsɪti/"
       },
       {
-        "unit": 2,
-        "en": "age",
-        "cn": "年龄",
-        "ipa": "eɪdʒ"
-      },
-      {
+        "no": 20,
         "unit": 1,
         "en": "cinema",
         "cn": "电影院",
-        "ipa": "ˈsɪnəmə"
+        "ipa": "/ˈsɪnəmə/"
       },
       {
-        "unit": 2,
-        "en": "often",
-        "cn": "经常",
-        "ipa": "ˈɒf(ə)n"
-      },
-      {
+        "no": 21,
         "unit": 1,
         "en": "ice",
         "cn": "冰",
-        "ipa": "aɪs"
+        "ipa": "/aɪs/"
       },
       {
-        "unit": 2,
-        "en": "talk",
-        "cn": "说话;谈论",
-        "ipa": "tɔːk"
-      },
-      {
+        "no": 22,
         "unit": 1,
         "en": "sing",
         "cn": "唱歌",
-        "ipa": "sɪŋ"
+        "ipa": "/sɪŋ/"
       },
       {
-        "unit": 2,
-        "en": "her",
-        "cn": "她的",
-        "ipa": "hɜː(r); hə(r)"
-      },
-      {
+        "no": 23,
         "unit": 1,
         "en": "dance",
         "cn": "跳舞",
-        "ipa": "dɑːns"
+        "ipa": "/dɑːns/"
       },
       {
-        "unit": 2,
-        "en": "sometimes",
-        "cn": "有时",
-        "ipa": "ˈsʌmtaɪmz"
-      },
-      {
+        "no": 24,
         "unit": 1,
         "en": "classmate",
         "cn": "同班同学",
-        "ipa": "ˈklɑːsmeɪt"
+        "ipa": "/ˈklɑːsmeɪt/"
       },
       {
-        "unit": 2,
-        "en": "ball",
-        "cn": "球",
-        "ipa": "bɔːl"
-      },
-      {
+        "no": 25,
         "unit": 1,
         "en": "daily",
         "cn": "每日的",
-        "ipa": "ˈdeɪli"
+        "ipa": "/ˈdeɪli/"
       },
       {
+        "no": 26,
+        "unit": 2,
+        "en": "life",
+        "cn": "生活;生命",
+        "ipa": "/laɪf/"
+      },
+      {
+        "no": 27,
+        "unit": 2,
+        "en": "get",
+        "cn": "拿;得到",
+        "ipa": "/ɡet/"
+      },
+      {
+        "no": 28,
+        "unit": 2,
+        "en": "get up",
+        "cn": "起床",
+        "ipa": "/ɡet ʌp/"
+      },
+      {
+        "no": 29,
+        "unit": 2,
+        "en": "bus",
+        "cn": "公共汽车",
+        "ipa": "/bʌs/"
+      },
+      {
+        "no": 30,
+        "unit": 2,
+        "en": "full",
+        "cn": "满的;饱的",
+        "ipa": "/fʊl/"
+      },
+      {
+        "no": 31,
+        "unit": 2,
+        "en": "into",
+        "cn": "到......里面",
+        "ipa": "/ˈɪntuː/"
+      },
+      {
+        "no": 32,
+        "unit": 2,
+        "en": "car",
+        "cn": "小汽车;轿车",
+        "ipa": "/kɑː(r)/"
+      },
+      {
+        "no": 33,
+        "unit": 2,
+        "en": "when",
+        "cn": "什么时候",
+        "ipa": "/wen/"
+      },
+      {
+        "no": 34,
+        "unit": 2,
+        "en": "football",
+        "cn": "足球",
+        "ipa": "/ˈfʊtbɔːl/"
+      },
+      {
+        "no": 35,
+        "unit": 2,
+        "en": "has",
+        "cn": "(have的第三人称单数形式)有;吃",
+        "ipa": "/hæz; həz/"
+      },
+      {
+        "no": 36,
+        "unit": 2,
+        "en": "garden",
+        "cn": "花园",
+        "ipa": "/ˈɡɑːd(ə)n/"
+      },
+      {
+        "no": 37,
+        "unit": 2,
+        "en": "sweep",
+        "cn": "扫",
+        "ipa": "/swiːp/"
+      },
+      {
+        "no": 38,
+        "unit": 2,
+        "en": "floor",
+        "cn": "地板;层",
+        "ipa": "/flɔː(r)/"
+      },
+      {
+        "no": 39,
+        "unit": 2,
+        "en": "chore",
+        "cn": "家务",
+        "ipa": "/tʃɔː(r)/"
+      },
+      {
+        "no": 40,
+        "unit": 2,
+        "en": "pick up",
+        "cn": "收拾;拾起",
+        "ipa": "/pɪk ʌp/"
+      },
+      {
+        "no": 41,
+        "unit": 2,
+        "en": "wash",
+        "cn": "洗",
+        "ipa": "/wɒʃ/"
+      },
+      {
+        "no": 42,
+        "unit": 2,
+        "en": "toilet",
+        "cn": "卫生间;厕所;坐便器",
+        "ipa": "/ˈtɔɪlət/"
+      },
+      {
+        "no": 43,
+        "unit": 2,
+        "en": "gym",
+        "cn": "健身房;体育馆",
+        "ipa": "/dʒɪm/"
+      },
+      {
+        "no": 44,
+        "unit": 2,
+        "en": "age",
+        "cn": "年龄",
+        "ipa": "/eɪdʒ/"
+      },
+      {
+        "no": 45,
+        "unit": 2,
+        "en": "often",
+        "cn": "经常",
+        "ipa": "/ˈɒf(ə)n/"
+      },
+      {
+        "no": 46,
+        "unit": 2,
+        "en": "talk",
+        "cn": "说话;谈论",
+        "ipa": "/tɔːk/"
+      },
+      {
+        "no": 47,
+        "unit": 2,
+        "en": "her",
+        "cn": "她的",
+        "ipa": "/hɜː(r); hə(r)/"
+      },
+      {
+        "no": 48,
+        "unit": 2,
+        "en": "sometimes",
+        "cn": "有时",
+        "ipa": "/ˈsʌmtaɪmz/"
+      },
+      {
+        "no": 49,
+        "unit": 2,
+        "en": "ball",
+        "cn": "球",
+        "ipa": "/bɔːl/"
+      },
+      {
+        "no": 50,
         "unit": 2,
         "en": "hand",
         "cn": "手",
-        "ipa": "hænd"
+        "ipa": "/hænd/"
       },
       {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 51,
+        "unit": 3,
         "en": "house",
         "cn": "房子",
-        "ipa": "haʊs"
+        "ipa": "/haʊs/"
       },
       {
-        "unit": 2,
-        "en": "Spring Festival",
-        "cn": "春节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 52,
+        "unit": 3,
         "en": "hobby",
         "cn": "爱好",
-        "ipa": "ˈhɒbi"
+        "ipa": "/ˈhɒbi/"
       },
       {
-        "unit": 2,
-        "en": "before",
-        "cn": "在......之前",
-        "ipa": "bɪˈfɔː(r)"
-      },
-      {
-        "unit": 1,
+        "no": 53,
+        "unit": 3,
         "en": "their",
         "cn": "他们的;她们的;它们的",
-        "ipa": "ðeə(r)"
+        "ipa": "/ðeə(r)/"
       },
       {
-        "unit": 2,
-        "en": "put up",
-        "cn": "张贴",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 54,
+        "unit": 3,
         "en": "interesting",
         "cn": "有意思的;令人感兴趣的",
-        "ipa": "ˈɪntrəstɪŋ"
+        "ipa": "/ˈɪntrəstɪŋ/"
       },
       {
-        "unit": 2,
-        "en": "luck",
-        "cn": "运气",
-        "ipa": "lʌk"
-      },
-      {
-        "unit": 1,
+        "no": 55,
+        "unit": 3,
         "en": "wonderful",
         "cn": "极好的",
-        "ipa": "ˈwʌndəf(ə)l"
+        "ipa": "/ˈwʌndəf(ə)l/"
       },
       {
-        "unit": 2,
-        "en": "else",
-        "cn": "其他的;此外",
-        "ipa": "els"
-      },
-      {
-        "unit": 1,
+        "no": 56,
+        "unit": 3,
         "en": "basketball",
         "cn": "篮球",
-        "ipa": "ˈbɑːskɪtbɔːl"
+        "ipa": "/ˈbɑːskɪtbɔːl/"
       },
       {
-        "unit": 2,
-        "en": "buy",
-        "cn": "买",
-        "ipa": "baɪ"
-      },
-      {
-        "unit": 1,
+        "no": 57,
+        "unit": 3,
         "en": "China",
         "cn": "中国",
-        "ipa": "ˈtʃaɪnə"
+        "ipa": "/ˈtʃaɪnə/"
       },
       {
-        "unit": 2,
-        "en": "dumpling",
-        "cn": "饺子",
-        "ipa": "ˈdʌmplɪŋ"
-      },
-      {
-        "unit": 2,
-        "en": "84",
+        "no": 58,
+        "unit": 3,
+        "en": "they're=they are",
         "cn": "他们是;她们是;它们是",
-        "ipa": ""
+        "ipa": "/ðeə(r)/ = /ðeɪ ɑː(r)/"
       },
       {
-        "unit": 2,
-        "en": "85",
+        "no": 59,
+        "unit": 3,
+        "en": "kung fu",
         "cn": "功夫",
-        "ipa": ""
+        "ipa": "/ˌkʌŋ ˈfuː/"
       },
       {
-        "unit": 2,
-        "en": "86",
+        "no": 60,
+        "unit": 3,
+        "en": "Peking opera",
         "cn": "中国京剧",
-        "ipa": ""
+        "ipa": "/ˌpiːˈkɪŋ ˈɒprə/"
       },
       {
-        "unit": 1,
+        "no": 61,
+        "unit": 3,
         "en": "ping-pong",
         "cn": "乒乓球",
-        "ipa": "ˈpɪŋ pɒŋ"
+        "ipa": "/ˈpɪŋ pɒŋ/"
       },
       {
-        "unit": 2,
-        "en": "them",
-        "cn": "他们;她们;它们(宾格)",
-        "ipa": "ðem; ðəm"
-      },
-      {
-        "unit": 2,
-        "en": "88",
+        "no": 62,
+        "unit": 3,
+        "en": "he's=he is",
         "cn": "他是",
-        "ipa": ""
+        "ipa": "/hiːz/ = /hiː ɪz/"
       },
       {
-        "unit": 1,
+        "no": 63,
+        "unit": 3,
         "en": "tree",
         "cn": "树",
-        "ipa": "triː"
+        "ipa": "/triː/"
       },
       {
-        "unit": 2,
-        "en": "lucky",
-        "cn": "幸运的",
-        "ipa": "ˈlʌki"
-      },
-      {
-        "unit": 1,
+        "no": 64,
+        "unit": 3,
         "en": "lake",
         "cn": "湖",
-        "ipa": "leɪk"
+        "ipa": "/leɪk/"
       },
       {
-        "unit": 2,
-        "en": "money",
-        "cn": "钱",
-        "ipa": "ˈmʌni"
-      },
-      {
-        "unit": 1,
+        "no": 65,
+        "unit": 3,
         "en": "learn",
         "cn": "学习",
-        "ipa": "lɜːn"
+        "ipa": "/lɜːn/"
       },
       {
-        "unit": 2,
-        "en": "lantern",
-        "cn": "灯笼",
-        "ipa": "ˈlæntən"
-      },
-      {
-        "unit": 2,
-        "en": "92",
+        "no": 66,
+        "unit": 3,
+        "en": "a lot",
         "cn": "许多",
-        "ipa": ""
+        "ipa": "/ə lɒt/"
       },
       {
-        "unit": 1,
+        "no": 67,
+        "unit": 3,
         "en": "from",
         "cn": "来自",
-        "ipa": "frɒm; frəm"
+        "ipa": "/frɒm; frəm/"
       },
       {
-        "unit": 2,
-        "en": "Lantern Festival",
-        "cn": "元宵节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 68,
+        "unit": 3,
         "en": "also",
         "cn": "也",
-        "ipa": "ˈɔːlsəʊ"
+        "ipa": "/ˈɔːlsəʊ/"
       },
       {
-        "unit": 2,
-        "en": "Dragon Boat Festival",
-        "cn": "端午节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 69,
+        "unit": 3,
         "en": "collect",
         "cn": "收集",
-        "ipa": "kəˈlekt"
+        "ipa": "/kəˈlekt/"
       },
       {
-        "unit": 2,
-        "en": "Mid-Autumn Festival",
-        "cn": "中秋节",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 70,
+        "unit": 3,
         "en": "stamp",
         "cn": "邮票",
-        "ipa": "stæmp"
+        "ipa": "/stæmp/"
       },
       {
-        "unit": 2,
-        "en": "fair",
-        "cn": "庙会",
-        "ipa": "feə(r)"
-      },
-      {
-        "unit": 1,
+        "no": 71,
+        "unit": 3,
         "en": "thing",
         "cn": "东西;事物",
-        "ipa": "θɪŋ"
+        "ipa": "/θɪŋ/"
       },
       {
-        "unit": 2,
-        "en": "boat",
-        "cn": "小船;划船",
-        "ipa": "bəʊt"
-      },
-      {
-        "unit": 1,
+        "no": 72,
+        "unit": 3,
         "en": "listen",
         "cn": "听",
-        "ipa": "ˈlɪs(ə)n"
+        "ipa": "/ˈlɪs(ə)n/"
       },
       {
-        "unit": 2,
-        "en": "race",
-        "cn": "赛跑;速度竞赛",
-        "ipa": "reɪs"
-      },
-      {
-        "unit": 1,
+        "no": 73,
+        "unit": 3,
         "en": "music",
         "cn": "音乐",
-        "ipa": "ˈmjuːzɪk"
+        "ipa": "/ˈmjuːzɪk/"
       },
       {
-        "unit": 2,
-        "en": "try",
-        "cn": "尝试",
-        "ipa": "traɪ"
-      },
-      {
-        "unit": 1,
+        "no": 74,
+        "unit": 3,
         "en": "song",
         "cn": "歌;歌曲",
-        "ipa": "sɒŋ"
+        "ipa": "/sɒŋ/"
       },
       {
-        "unit": 2,
-        "en": "map",
-        "cn": "地图",
-        "ipa": "mæp"
-      },
-      {
-        "unit": 1,
+        "no": 75,
+        "unit": 3,
         "en": "tail",
         "cn": "尾巴",
-        "ipa": "teɪl"
+        "ipa": "/teɪl/"
       },
       {
-        "unit": 2,
-        "en": "sleep",
-        "cn": "睡觉",
-        "ipa": "sliːp"
-      },
-      {
-        "unit": 1,
+        "no": 76,
+        "unit": 4,
         "en": "festival",
         "cn": "节日",
-        "ipa": "ˈfestɪvl; ˈfestəvəl"
+        "ipa": "/ˈfestɪvl; ˈfestəvəl/"
       },
       {
-        "unit": 2,
+        "no": 77,
+        "unit": 4,
+        "en": "Spring Festival",
+        "cn": "春节",
+        "ipa": "/sprɪŋ ˈfestɪvl/"
+      },
+      {
+        "no": 78,
+        "unit": 4,
+        "en": "before",
+        "cn": "在......之前",
+        "ipa": "/bɪˈfɔː(r)/"
+      },
+      {
+        "no": 79,
+        "unit": 4,
+        "en": "put up",
+        "cn": "张贴",
+        "ipa": "/pʊt ʌp/"
+      },
+      {
+        "no": 80,
+        "unit": 4,
+        "en": "luck",
+        "cn": "运气",
+        "ipa": "/lʌk/"
+      },
+      {
+        "no": 81,
+        "unit": 4,
+        "en": "else",
+        "cn": "其他的;此外",
+        "ipa": "/els/"
+      },
+      {
+        "no": 82,
+        "unit": 4,
+        "en": "buy",
+        "cn": "买",
+        "ipa": "/baɪ/"
+      },
+      {
+        "no": 83,
+        "unit": 4,
+        "en": "dumpling",
+        "cn": "饺子",
+        "ipa": "/ˈdʌmplɪŋ/"
+      },
+      {
+        "no": 84,
+        "unit": 4,
+        "en": "gala",
+        "cn": "盛会;庆典",
+        "ipa": "/ˈɡɑːlə/"
+      },
+      {
+        "no": 85,
+        "unit": 4,
+        "en": "dragon",
+        "cn": "龙",
+        "ipa": "/ˈdræɡən/"
+      },
+      {
+        "no": 86,
+        "unit": 4,
+        "en": "say",
+        "cn": "说",
+        "ipa": "/seɪ/"
+      },
+      {
+        "no": 87,
+        "unit": 4,
+        "en": "them",
+        "cn": "他们;她们;它们(宾格)",
+        "ipa": "/ðem; ðəm/"
+      },
+      {
+        "no": 88,
+        "unit": 4,
+        "en": "any",
+        "cn": "任何的;任一的",
+        "ipa": "/ˈeni/"
+      },
+      {
+        "no": 89,
+        "unit": 4,
+        "en": "lucky",
+        "cn": "幸运的",
+        "ipa": "/ˈlʌki/"
+      },
+      {
+        "no": 90,
+        "unit": 4,
+        "en": "money",
+        "cn": "钱",
+        "ipa": "/ˈmʌni/"
+      },
+      {
+        "no": 91,
+        "unit": 4,
+        "en": "lantern",
+        "cn": "灯笼",
+        "ipa": "/ˈlæntən/"
+      },
+      {
+        "no": 92,
+        "unit": 4,
+        "en": "riddle",
+        "cn": "谜语",
+        "ipa": "/ˈrɪd(ə)l/"
+      },
+      {
+        "no": 93,
+        "unit": 4,
+        "en": "Lantern Festival",
+        "cn": "元宵节",
+        "ipa": "/ˈlæntən ˈfestɪvl/"
+      },
+      {
+        "no": 94,
+        "unit": 4,
+        "en": "Dragon Boat Festival",
+        "cn": "端午节",
+        "ipa": "/ˈdræɡən bəʊt ˈfestɪvl/"
+      },
+      {
+        "no": 95,
+        "unit": 4,
+        "en": "Mid-Autumn Festival",
+        "cn": "中秋节",
+        "ipa": "/ˌmɪd ˈɔːtəm ˈfestɪvl/"
+      },
+      {
+        "no": 96,
+        "unit": 4,
+        "en": "fair",
+        "cn": "庙会",
+        "ipa": "/feə(r)/"
+      },
+      {
+        "no": 97,
+        "unit": 4,
+        "en": "boat",
+        "cn": "小船;划船",
+        "ipa": "/bəʊt/"
+      },
+      {
+        "no": 98,
+        "unit": 4,
+        "en": "race",
+        "cn": "赛跑;速度竞赛",
+        "ipa": "/reɪs/"
+      },
+      {
+        "no": 99,
+        "unit": 4,
+        "en": "try",
+        "cn": "尝试",
+        "ipa": "/traɪ/"
+      },
+      {
+        "no": 100,
+        "unit": 4,
+        "en": "map",
+        "cn": "地图",
+        "ipa": "/mæp/"
+      },
+      {
+        "no": 101,
+        "unit": 5,
+        "en": "sleep",
+        "cn": "睡觉",
+        "ipa": "/sliːp/"
+      },
+      {
+        "no": 102,
+        "unit": 5,
         "en": "merry",
         "cn": "快乐的",
-        "ipa": "ˈmeri"
+        "ipa": "/ˈmeri/"
       },
       {
-        "unit": 1,
-        "en": "音标",
-        "cn": "英文",
-        "ipa": ""
-      },
-      {
-        "unit": 1,
+        "no": 103,
+        "unit": 5,
         "en": "Christmas",
         "cn": "圣诞节",
-        "ipa": "ˈkrɪsməs"
+        "ipa": "/ˈkrɪsməs/"
       },
       {
-        "unit": 2,
-        "en": "join",
-        "cn": "参加",
-        "ipa": "dʒɔɪn"
-      },
-      {
-        "unit": 1,
+        "no": 104,
+        "unit": 5,
         "en": "moon",
         "cn": "月亮",
-        "ipa": "muːn"
+        "ipa": "/muːn/"
       },
       {
-        "unit": 2,
-        "en": "best",
-        "cn": "最",
-        "ipa": "best"
-      },
-      {
-        "unit": 1,
+        "no": 105,
+        "unit": 5,
         "en": "mooncake",
         "cn": "月饼",
-        "ipa": "ˈmu:nkeɪk"
+        "ipa": "/ˈmu:nkeɪk/"
       },
       {
-        "unit": 2,
-        "en": "yours",
-        "cn": "你(们)的(东西);(用于书信结尾)......谨上",
-        "ipa": "jɔːz"
-      },
-      {
-        "unit": 1,
+        "no": 106,
+        "unit": 5,
         "en": "hope",
         "cn": "希望",
-        "ipa": "həʊp"
+        "ipa": "/həʊp/"
       },
       {
-        "unit": 2,
+        "no": 107,
+        "unit": 5,
+        "en": "join",
+        "cn": "参加",
+        "ipa": "/dʒɔɪn/"
+      },
+      {
+        "no": 108,
+        "unit": 5,
+        "en": "best",
+        "cn": "最",
+        "ipa": "/best/"
+      },
+      {
+        "no": 109,
+        "unit": 5,
+        "en": "yours",
+        "cn": "你(们)的(东西);(用于书信结尾)......谨上",
+        "ipa": "/jɔːz/"
+      },
+      {
+        "no": 110,
+        "unit": 5,
         "en": "quiet",
         "cn": "安静的",
-        "ipa": "ˈkwaɪət"
+        "ipa": "/ˈkwaɪət/"
+      }
+    ]
+  },
+  {
+    "semester": "四年级下册",
+    "words": [
+      {
+        "no": 1,
+        "unit": 1,
+        "en": "weekly",
+        "cn": "每周的",
+        "ipa": "/ˈwiːkli/"
+      },
+      {
+        "no": 2,
+        "unit": 1,
+        "en": "activity",
+        "cn": "活动",
+        "ipa": "/ækˈtɪvəti/"
+      },
+      {
+        "no": 3,
+        "unit": 1,
+        "en": "week",
+        "cn": "星期, 周",
+        "ipa": "/wiːk/"
+      },
+      {
+        "no": 4,
+        "unit": 1,
+        "en": "Sunday",
+        "cn": "星期日",
+        "ipa": "/ˈsʌndeɪ/"
+      },
+      {
+        "no": 5,
+        "unit": 1,
+        "en": "Monday",
+        "cn": "星期一",
+        "ipa": "/ˈmʌndeɪ; ˈmʌndi/"
+      },
+      {
+        "no": 6,
+        "unit": 1,
+        "en": "Tuesday",
+        "cn": "星期二",
+        "ipa": "/ˈtjuːzdeɪ/"
+      },
+      {
+        "no": 7,
+        "unit": 1,
+        "en": "Wednesday",
+        "cn": "星期三",
+        "ipa": "/ˈwenzdeɪ/"
+      },
+      {
+        "no": 8,
+        "unit": 1,
+        "en": "Thursday",
+        "cn": "星期四",
+        "ipa": "/ˈθɜːzdeɪ/"
+      },
+      {
+        "no": 9,
+        "unit": 1,
+        "en": "Friday",
+        "cn": "星期五",
+        "ipa": "/ˈfraɪdeɪ/"
+      },
+      {
+        "no": 10,
+        "unit": 1,
+        "en": "Saturday",
+        "cn": "星期六",
+        "ipa": "/ˈsætədeɪ/"
+      },
+      {
+        "no": 11,
+        "unit": 1,
+        "en": "fifty",
+        "cn": "五十",
+        "ipa": "/ˈfɪfti/"
+      },
+      {
+        "no": 12,
+        "unit": 1,
+        "en": "must",
+        "cn": "必须",
+        "ipa": "/mʌst; məst/"
+      },
+      {
+        "no": 13,
+        "unit": 1,
+        "en": "robot",
+        "cn": "机器人",
+        "ipa": "/ˈrəʊbɒt/"
+      },
+      {
+        "no": 14,
+        "unit": 1,
+        "en": "weekday",
+        "cn": "工作日",
+        "ipa": "/ˈwiːkdeɪ/"
+      },
+      {
+        "no": 15,
+        "unit": 1,
+        "en": "piano",
+        "cn": "钢琴",
+        "ipa": "/piˈænəʊ/"
+      },
+      {
+        "no": 16,
+        "unit": 1,
+        "en": "chess",
+        "cn": "国际象棋",
+        "ipa": "/tʃes/"
+      },
+      {
+        "no": 17,
+        "unit": 1,
+        "en": "every",
+        "cn": "每个",
+        "ipa": "/ˈevri/"
+      },
+      {
+        "no": 18,
+        "unit": 1,
+        "en": "sit",
+        "cn": "坐",
+        "ipa": "/sɪt/"
+      },
+      {
+        "no": 19,
+        "unit": 1,
+        "en": "door",
+        "cn": "门",
+        "ipa": "/dɔː(r)/"
+      },
+      {
+        "no": 20,
+        "unit": 1,
+        "en": "helpful",
+        "cn": "有帮助的;乐于助人的",
+        "ipa": "/ˈhelpf(ə)l/"
+      },
+      {
+        "no": 21,
+        "unit": 1,
+        "en": "foot",
+        "cn": "(复数 feet)脚",
+        "ipa": "/fʊt/"
+      },
+      {
+        "no": 22,
+        "unit": 1,
+        "en": "tomorrow",
+        "cn": "明天",
+        "ipa": "/təˈmɒrəʊ/"
+      },
+      {
+        "no": 23,
+        "unit": 1,
+        "en": "weekend",
+        "cn": "周末",
+        "ipa": "/ˌwiːkˈend; ˈwiːkend/"
+      },
+      {
+        "no": 24,
+        "unit": 1,
+        "en": "hooray",
+        "cn": "(表示高兴、赞许等)好哇",
+        "ipa": "/huˈreɪ/"
+      },
+      {
+        "no": 25,
+        "unit": 1,
+        "en": "film",
+        "cn": "电影",
+        "ipa": "/fɪlm/"
+      },
+      {
+        "no": 26,
+        "unit": 2,
+        "en": "evening",
+        "cn": "傍晚",
+        "ipa": "/ˈiːvnɪŋ/"
+      },
+      {
+        "no": 27,
+        "unit": 2,
+        "en": "picnic",
+        "cn": "野餐",
+        "ipa": "/ˈpɪknɪk/"
+      },
+      {
+        "no": 28,
+        "unit": 2,
+        "en": "subject",
+        "cn": "科目",
+        "ipa": "/ˈsʌbdʒɪkt/"
+      },
+      {
+        "no": 29,
+        "unit": 2,
+        "en": "science",
+        "cn": "科学",
+        "ipa": "/ˈsaɪəns/"
+      },
+      {
+        "no": 30,
+        "unit": 2,
+        "en": "math",
+        "cn": "数学",
+        "ipa": "/mæθ/"
+      },
+      {
+        "no": 31,
+        "unit": 2,
+        "en": "because",
+        "cn": "因为",
+        "ipa": "/bɪˈkɒz;bɪˈkəz/"
+      },
+      {
+        "no": 32,
+        "unit": 2,
+        "en": "useful",
+        "cn": "有用的",
+        "ipa": "/ˈjuːsf(ə)l/"
+      },
+      {
+        "no": 33,
+        "unit": 2,
+        "en": "but",
+        "cn": "但是",
+        "ipa": "/bʌt; bət/"
+      },
+      {
+        "no": 34,
+        "unit": 2,
+        "en": "worry",
+        "cn": "担心",
+        "ipa": "/ˈwʌri/"
+      },
+      {
+        "no": 35,
+        "unit": 2,
+        "en": "water",
+        "cn": "水;浇水",
+        "ipa": "/ˈwɔːtə(r)/"
+      },
+      {
+        "no": 36,
+        "unit": 2,
+        "en": "poem",
+        "cn": "诗",
+        "ipa": "/ˈpəʊɪm/"
+      },
+      {
+        "no": 37,
+        "unit": 2,
+        "en": "kind",
+        "cn": "体贴的;友好的",
+        "ipa": "/kaɪnd/"
+      },
+      {
+        "no": 38,
+        "unit": 2,
+        "en": "exercise",
+        "cn": "锻炼",
+        "ipa": "/ˈeksəsaɪz/"
+      },
+      {
+        "no": 39,
+        "unit": 2,
+        "en": "fox",
+        "cn": "狐狸",
+        "ipa": "/fɒks/"
+      },
+      {
+        "no": 40,
+        "unit": 2,
+        "en": "enjoy",
+        "cn": "欣赏;享受",
+        "ipa": "/ɪnˈdʒɔɪ/"
+      },
+      {
+        "no": 41,
+        "unit": 2,
+        "en": "search",
+        "cn": "搜查;搜寻",
+        "ipa": "/sɜːtʃ/"
+      },
+      {
+        "no": 42,
+        "unit": 2,
+        "en": "internet",
+        "cn": "互联网",
+        "ipa": "/ˈɪntənet/"
+      },
+      {
+        "no": 43,
+        "unit": 2,
+        "en": "information",
+        "cn": "信息",
+        "ipa": "/ˌɪnfəˈmeɪʃ(ə)n/"
+      },
+      {
+        "no": 44,
+        "unit": 2,
+        "en": "tell",
+        "cn": "告诉",
+        "ipa": "/tel/"
+      },
+      {
+        "no": 45,
+        "unit": 2,
+        "en": "story",
+        "cn": "故事",
+        "ipa": "/ˈstɔːri/"
+      },
+      {
+        "no": 46,
+        "unit": 2,
+        "en": "fly",
+        "cn": "飞;放飞",
+        "ipa": "/flaɪ/"
+      },
+      {
+        "no": 47,
+        "unit": 2,
+        "en": "why",
+        "cn": "为什么",
+        "ipa": "/waɪ/"
+      },
+      {
+        "no": 48,
+        "unit": 2,
+        "en": "slide show",
+        "cn": "幻灯片放映",
+        "ipa": "/slaɪd ʃəʊ/"
+      },
+      {
+        "no": 49,
+        "unit": 2,
+        "en": "zero",
+        "cn": "零",
+        "ipa": "/ˈzɪərəʊ/"
+      },
+      {
+        "no": 50,
+        "unit": 2,
+        "en": "feeling",
+        "cn": "感觉",
+        "ipa": "/ˈfiːlɪŋ/"
+      },
+      {
+        "no": 51,
+        "unit": 3,
+        "en": "tired",
+        "cn": "疲倦的",
+        "ipa": "/ˈtaɪəd/"
+      },
+      {
+        "no": 52,
+        "unit": 3,
+        "en": "excited",
+        "cn": "激动的",
+        "ipa": "/ɪkˈsaɪtɪd/"
+      },
+      {
+        "no": 53,
+        "unit": 3,
+        "en": "over",
+        "cn": "在......上面",
+        "ipa": "/ˈəʊvə(r)/"
+      },
+      {
+        "no": 54,
+        "unit": 3,
+        "en": "nervous",
+        "cn": "紧张的",
+        "ipa": "/ˈnɜːvəs/"
+      },
+      {
+        "no": 55,
+        "unit": 3,
+        "en": "winner",
+        "cn": "获胜者",
+        "ipa": "/ˈwɪnə(r)/"
+      },
+      {
+        "no": 56,
+        "unit": 3,
+        "en": "proud",
+        "cn": "自豪的",
+        "ipa": "/praʊd/"
+      },
+      {
+        "no": 57,
+        "unit": 3,
+        "en": "feel",
+        "cn": "感到;觉得",
+        "ipa": "/fiːl/"
+      },
+      {
+        "no": 58,
+        "unit": 3,
+        "en": "better",
+        "cn": "较好的;更好的",
+        "ipa": "/ˈbetə(r)/"
+      },
+      {
+        "no": 59,
+        "unit": 3,
+        "en": "next",
+        "cn": "下一个的",
+        "ipa": "/nekst/"
+      },
+      {
+        "no": 60,
+        "unit": 3,
+        "en": "sad",
+        "cn": "悲伤的",
+        "ipa": "/sæd/"
+      },
+      {
+        "no": 61,
+        "unit": 3,
+        "en": "him",
+        "cn": "他(宾格)",
+        "ipa": "/hɪm/"
+      },
+      {
+        "no": 62,
+        "unit": 3,
+        "en": "high",
+        "cn": "高的",
+        "ipa": "/haɪ/"
+      },
+      {
+        "no": 63,
+        "unit": 3,
+        "en": "angry",
+        "cn": "愤怒的",
+        "ipa": "/ˈæŋɡri/"
+      },
+      {
+        "no": 64,
+        "unit": 3,
+        "en": "count",
+        "cn": "数数;计算",
+        "ipa": "/kaʊnt/"
+      },
+      {
+        "no": 65,
+        "unit": 3,
+        "en": "parent",
+        "cn": "父,母;家长",
+        "ipa": "/ˈpeərənt/"
+      },
+      {
+        "no": 66,
+        "unit": 3,
+        "en": "farm",
+        "cn": "农场",
+        "ipa": "/fɑːm/"
+      },
+      {
+        "no": 67,
+        "unit": 3,
+        "en": "poor",
+        "cn": "可怜的;贫穷的",
+        "ipa": "/pɔː(r); pʊə(r)/"
+      },
+      {
+        "no": 68,
+        "unit": 3,
+        "en": "duckling",
+        "cn": "小鸭",
+        "ipa": "/ˈdʌklɪŋ/"
+      },
+      {
+        "no": 69,
+        "unit": 3,
+        "en": "bored",
+        "cn": "厌倦的;烦闷的",
+        "ipa": "/bɔːd/"
+      },
+      {
+        "no": 70,
+        "unit": 3,
+        "en": "ugly",
+        "cn": "丑陋的",
+        "ipa": "/ˈʌɡli/"
+      },
+      {
+        "no": 71,
+        "unit": 3,
+        "en": "lonely",
+        "cn": "孤独的;寂寞的",
+        "ipa": "/ˈləʊnli/"
+      },
+      {
+        "no": 72,
+        "unit": 3,
+        "en": "thirsty",
+        "cn": "渴的",
+        "ipa": "/ˈθɜːsti/"
+      },
+      {
+        "no": 73,
+        "unit": 3,
+        "en": "swan",
+        "cn": "天鹅",
+        "ipa": "/swɒn/"
+      },
+      {
+        "no": 74,
+        "unit": 3,
+        "en": "by",
+        "cn": "通过;以......(方式)",
+        "ipa": "/baɪ/"
+      },
+      {
+        "no": 75,
+        "unit": 3,
+        "en": "subway",
+        "cn": "地铁",
+        "ipa": "/ˈsʌbweɪ/"
+      },
+      {
+        "no": 76,
+        "unit": 4,
+        "en": "near",
+        "cn": "在附近",
+        "ipa": "/nɪə(r)/"
+      },
+      {
+        "no": 77,
+        "unit": 4,
+        "en": "far",
+        "cn": "遥远的",
+        "ipa": "/fɑː(r)/"
+      },
+      {
+        "no": 78,
+        "unit": 4,
+        "en": "away",
+        "cn": "去别处;离开",
+        "ipa": "/əˈweɪ/"
+      },
+      {
+        "no": 79,
+        "unit": 4,
+        "en": "dad",
+        "cn": "爸爸",
+        "ipa": "/dæd/"
+      },
+      {
+        "no": 80,
+        "unit": 4,
+        "en": "take",
+        "cn": "带走;拿走;搭乘(交通工具)",
+        "ipa": "/teɪk/"
+      },
+      {
+        "no": 81,
+        "unit": 4,
+        "en": "does",
+        "cn": "(do的第三人称单数形式)做",
+        "ipa": "/dʌz/"
+      },
+      {
+        "no": 82,
+        "unit": 4,
+        "en": "work",
+        "cn": "工作",
+        "ipa": "/wɜːk/"
+      },
+      {
+        "no": 83,
+        "unit": 4,
+        "en": "his",
+        "cn": "他的",
+        "ipa": "/hɪz; ɪz/"
+      },
+      {
+        "no": 84,
+        "unit": 4,
+        "en": "office",
+        "cn": "办公室",
+        "ipa": "/ˈɒfɪs/"
+      },
+      {
+        "no": 85,
+        "unit": 4,
+        "en": "live",
+        "cn": "生活",
+        "ipa": "/lɪv; laɪv/"
+      },
+      {
+        "no": 86,
+        "unit": 4,
+        "en": "forty",
+        "cn": "四十",
+        "ipa": "/ˈfɔːti/"
+      },
+      {
+        "no": 87,
+        "unit": 4,
+        "en": "travel",
+        "cn": "旅游",
+        "ipa": "/ˈtræv(ə)l/"
+      },
+      {
+        "no": 88,
+        "unit": 4,
+        "en": "train",
+        "cn": "火车",
+        "ipa": "/treɪn/"
+      },
+      {
+        "no": 89,
+        "unit": 4,
+        "en": "cheap",
+        "cn": "便宜的",
+        "ipa": "/tʃiːp/"
+      },
+      {
+        "no": 90,
+        "unit": 4,
+        "en": "summer",
+        "cn": "夏天",
+        "ipa": "/ˈsʌmə(r)/"
+      },
+      {
+        "no": 91,
+        "unit": 4,
+        "en": "holiday",
+        "cn": "假期;节日",
+        "ipa": "/ˈhɒlədeɪ/"
+      },
+      {
+        "no": 92,
+        "unit": 4,
+        "en": "plane",
+        "cn": "飞机",
+        "ipa": "/pleɪn/"
+      },
+      {
+        "no": 93,
+        "unit": 4,
+        "en": "surprise",
+        "cn": "惊喜",
+        "ipa": "/səˈpraɪz/"
+      },
+      {
+        "no": 94,
+        "unit": 4,
+        "en": "turn",
+        "cn": "转动;转弯",
+        "ipa": "/tɜːn/"
+      },
+      {
+        "no": 95,
+        "unit": 4,
+        "en": "will",
+        "cn": "(构成将来时) 将;会",
+        "ipa": "/wɪl/"
+      },
+      {
+        "no": 96,
+        "unit": 4,
+        "en": "I'll=I will",
+        "cn": "我将会",
+        "ipa": "/aɪl/ = /aɪ wɪl/"
+      },
+      {
+        "no": 97,
+        "unit": 4,
+        "en": "the UK",
+        "cn": "英国",
+        "ipa": "/ðə ˌjuː ˈkeɪ/"
+      },
+      {
+        "no": 98,
+        "unit": 4,
+        "en": "Hong Kong",
+        "cn": "香港",
+        "ipa": "/ˌhɒŋ ˈkɒŋ/"
+      },
+      {
+        "no": 99,
+        "unit": 4,
+        "en": "ship",
+        "cn": "船",
+        "ipa": "/ʃɪp/"
+      }
+    ]
+  },
+  {
+    "semester": "五年级上册",
+    "words": [
+      {
+        "no": 1,
+        "unit": 1,
+        "en": "weather",
+        "cn": "天气",
+        "ipa": "/ˈweðə(r)/"
+      },
+      {
+        "no": 2,
+        "unit": 1,
+        "en": "different",
+        "cn": "不同的",
+        "ipa": "/ˈdɪfrənt/"
+      },
+      {
+        "no": 3,
+        "unit": 1,
+        "en": "season",
+        "cn": "季节",
+        "ipa": "/ˈsiːz(ə)n/"
+      },
+      {
+        "no": 4,
+        "unit": 1,
+        "en": "spring",
+        "cn": "春天",
+        "ipa": "/sprɪŋ/"
+      },
+      {
+        "no": 5,
+        "unit": 1,
+        "en": "autumn",
+        "cn": "秋天",
+        "ipa": "/ˈɔːtəm/"
+      },
+      {
+        "no": 6,
+        "unit": 1,
+        "en": "winter",
+        "cn": "冬天",
+        "ipa": "/ˈwɪntə(r)/"
+      },
+      {
+        "no": 7,
+        "unit": 1,
+        "en": "warm",
+        "cn": "温暖的",
+        "ipa": "/wɔːm/"
+      },
+      {
+        "no": 8,
+        "unit": 1,
+        "en": "sunny",
+        "cn": "阳光充足的",
+        "ipa": "/ˈsʌni/"
+      },
+      {
+        "no": 9,
+        "unit": 1,
+        "en": "hot",
+        "cn": "热的",
+        "ipa": "/hɒt/"
+      },
+      {
+        "no": 10,
+        "unit": 1,
+        "en": "know",
+        "cn": "知道;了解",
+        "ipa": "/nəʊ/"
+      },
+      {
+        "no": 11,
+        "unit": 1,
+        "en": "good job",
+        "cn": "干得好",
+        "ipa": "/ɡʊd dʒɒb/"
+      },
+      {
+        "no": 12,
+        "unit": 1,
+        "en": "snow",
+        "cn": "雪",
+        "ipa": "/snəʊ/"
+      },
+      {
+        "no": 13,
+        "unit": 1,
+        "en": "snow",
+        "cn": "下雪",
+        "ipa": "/snəʊ/"
+      },
+      {
+        "no": 14,
+        "unit": 1,
+        "en": "skate",
+        "cn": "滑冰;溜冰",
+        "ipa": "/skeɪt/"
+      },
+      {
+        "no": 15,
+        "unit": 1,
+        "en": "call",
+        "cn": "呼叫;打电话",
+        "ipa": "/kɔːl/"
+      },
+      {
+        "no": 16,
+        "unit": 1,
+        "en": "cloudy",
+        "cn": "阴天的;多云的",
+        "ipa": "/ˈklaʊdi/"
+      },
+      {
+        "no": 17,
+        "unit": 1,
+        "en": "snowy",
+        "cn": "多雪的;下雪的",
+        "ipa": "/ˈsnəʊi/"
+      },
+      {
+        "no": 18,
+        "unit": 1,
+        "en": "inside",
+        "cn": "在...内;在...里",
+        "ipa": "/ˌɪnˈsaɪd/"
+      },
+      {
+        "no": 19,
+        "unit": 1,
+        "en": "windy",
+        "cn": "多风的;风大的",
+        "ipa": "/ˈwɪndi/"
+      },
+      {
+        "no": 20,
+        "unit": 1,
+        "en": "rainy",
+        "cn": "多雨的",
+        "ipa": "/ˈreɪni/"
+      },
+      {
+        "no": 21,
+        "unit": 1,
+        "en": "take care",
+        "cn": "保重;照顾",
+        "ipa": "/teɪk keə(r)/"
+      },
+      {
+        "no": 22,
+        "unit": 1,
+        "en": "rain",
+        "cn": "雨",
+        "ipa": "/reɪn/"
+      },
+      {
+        "no": 23,
+        "unit": 1,
+        "en": "rain",
+        "cn": "下雨",
+        "ipa": "/reɪn/"
+      },
+      {
+        "no": 24,
+        "unit": 1,
+        "en": "little",
+        "cn": "小的;少量的;不多的",
+        "ipa": "/ˈlɪt(ə)l/"
+      },
+      {
+        "no": 25,
+        "unit": 1,
+        "en": "sunshine",
+        "cn": "阳光",
+        "ipa": "/ˈsʌnʃaɪn/"
+      },
+      {
+        "no": 26,
+        "unit": 2,
+        "en": "night",
+        "cn": "夜晚;晚上",
+        "ipa": "/naɪt/"
+      },
+      {
+        "no": 27,
+        "unit": 2,
+        "en": "short",
+        "cn": "短的;个子矮的",
+        "ipa": "/ʃɔːt/"
+      },
+      {
+        "no": 28,
+        "unit": 2,
+        "en": "sunglasses",
+        "cn": "墨镜;太阳镜",
+        "ipa": "/ˈsʌnɡlɑːsɪz/"
+      },
+      {
+        "no": 29,
+        "unit": 2,
+        "en": "outing",
+        "cn": "出外游玩;远足",
+        "ipa": "/ˈaʊtɪŋ/"
+      },
+      {
+        "no": 30,
+        "unit": 2,
+        "en": "coat",
+        "cn": "外套;大衣",
+        "ipa": "/kəʊt/"
+      },
+      {
+        "no": 31,
+        "unit": 2,
+        "en": "snowman",
+        "cn": "雪人",
+        "ipa": "/ˈsnəʊmæn/"
+      },
+      {
+        "no": 32,
+        "unit": 2,
+        "en": "change",
+        "cn": "改变;变化",
+        "ipa": "/tʃeɪndʒ/"
+      },
+      {
+        "no": 33,
+        "unit": 2,
+        "en": "email",
+        "cn": "电子邮件",
+        "ipa": "/ˈiːmeɪl/"
+      },
+      {
+        "no": 34,
+        "unit": 2,
+        "en": "grandparent",
+        "cn": "(外)祖父;(外)祖母",
+        "ipa": "/ˈɡrænpeərənt/"
+      },
+      {
+        "no": 35,
+        "unit": 2,
+        "en": "something",
+        "cn": "某事;某物",
+        "ipa": "/ˈsʌmθɪŋ/"
+      },
+      {
+        "no": 36,
+        "unit": 2,
+        "en": "people",
+        "cn": "人;人们;人民",
+        "ipa": "/ˈpiːp(ə)l/"
+      },
+      {
+        "no": 37,
+        "unit": 2,
+        "en": "then",
+        "cn": "接着;然后",
+        "ipa": "/ðen/"
+      },
+      {
+        "no": 38,
+        "unit": 2,
+        "en": "out",
+        "cn": "(从...里)出来",
+        "ipa": "/aʊt/"
+      },
+      {
+        "no": 39,
+        "unit": 2,
+        "en": "take off",
+        "cn": "脱下;脱掉(衣物);起飞",
+        "ipa": "/teɪk ɒf/"
+      },
+      {
+        "no": 40,
+        "unit": 2,
+        "en": "again",
+        "cn": "又一次;再一次",
+        "ipa": "/əˈɡen/"
+      },
+      {
+        "no": 41,
+        "unit": 2,
+        "en": "month",
+        "cn": "月",
+        "ipa": "/mʌnθ/"
+      },
+      {
+        "no": 42,
+        "unit": 2,
+        "en": "Mount Wuyi",
+        "cn": "武夷山",
+        "ipa": "/maʊnt ˈwuːjiː/"
+      },
+      {
+        "no": 43,
+        "unit": 2,
+        "en": "October",
+        "cn": "十月",
+        "ipa": "/ɒkˈtəʊbə(r)/"
+      },
+      {
+        "no": 44,
+        "unit": 2,
+        "en": "plan",
+        "cn": "计划",
+        "ipa": "/plæn/"
+      },
+      {
+        "no": 45,
+        "unit": 2,
+        "en": "National Day",
+        "cn": "国庆节",
+        "ipa": "/ˈnæʃnəl deɪ/"
+      },
+      {
+        "no": 46,
+        "unit": 2,
+        "en": "mountain",
+        "cn": "高山",
+        "ipa": "/ˈmaʊntən/"
+      },
+      {
+        "no": 47,
+        "unit": 2,
+        "en": "river",
+        "cn": "河;江",
+        "ipa": "/ˈrɪvə(r)/"
+      },
+      {
+        "no": 48,
+        "unit": 2,
+        "en": "clear",
+        "cn": "清晰的;透明的",
+        "ipa": "/klɪə(r)/"
+      },
+      {
+        "no": 49,
+        "unit": 2,
+        "en": "sound",
+        "cn": "听起来好像",
+        "ipa": "/saʊnd/"
+      },
+      {
+        "no": 50,
+        "unit": 2,
+        "en": "sound",
+        "cn": "声音",
+        "ipa": "/saʊnd/"
+      },
+      {
+        "no": 51,
+        "unit": 3,
+        "en": "June",
+        "cn": "六月",
+        "ipa": "/dʒuːn/"
+      },
+      {
+        "no": 52,
+        "unit": 3,
+        "en": "July",
+        "cn": "七月",
+        "ipa": "/dʒʊˈlaɪ/"
+      },
+      {
+        "no": 53,
+        "unit": 3,
+        "en": "August",
+        "cn": "八月",
+        "ipa": "/ˈɔːɡəst/"
+      },
+      {
+        "no": 54,
+        "unit": 3,
+        "en": "September",
+        "cn": "九月",
+        "ipa": "/sepˈtembə(r)/"
+      },
+      {
+        "no": 55,
+        "unit": 3,
+        "en": "November",
+        "cn": "十一月",
+        "ipa": "/nəʊˈvembə(r)/"
+      },
+      {
+        "no": 56,
+        "unit": 3,
+        "en": "more",
+        "cn": "更多的;更大的",
+        "ipa": "/mɔː(r)/"
+      },
+      {
+        "no": 57,
+        "unit": 3,
+        "en": "December",
+        "cn": "十二月",
+        "ipa": "/dɪˈsembə(r)/"
+      },
+      {
+        "no": 58,
+        "unit": 3,
+        "en": "January",
+        "cn": "一月",
+        "ipa": "/ˈdʒænjuəri/"
+      },
+      {
+        "no": 59,
+        "unit": 3,
+        "en": "or",
+        "cn": "或者",
+        "ipa": "/ɔː(r)/"
+      },
+      {
+        "no": 60,
+        "unit": 3,
+        "en": "February",
+        "cn": "二月",
+        "ipa": "/ˈfebruəri/"
+      },
+      {
+        "no": 61,
+        "unit": 3,
+        "en": "March",
+        "cn": "三月",
+        "ipa": "/mɑːtʃ/"
+      },
+      {
+        "no": 62,
+        "unit": 3,
+        "en": "May",
+        "cn": "五月",
+        "ipa": "/meɪ/"
+      },
+      {
+        "no": 63,
+        "unit": 3,
+        "en": "April",
+        "cn": "四月",
+        "ipa": "/ˈeɪprəl/"
+      },
+      {
+        "no": 64,
+        "unit": 3,
+        "en": "Labor Day",
+        "cn": "劳动节",
+        "ipa": "/ˈleɪbə deɪ/"
+      },
+      {
+        "no": 65,
+        "unit": 3,
+        "en": "easy",
+        "cn": "容易的",
+        "ipa": "/ˈiːzi/"
+      },
+      {
+        "no": 66,
+        "unit": 3,
+        "en": "remember",
+        "cn": "记住",
+        "ipa": "/rɪˈmembə(r)/"
+      },
+      {
+        "no": 67,
+        "unit": 3,
+        "en": "place",
+        "cn": "地方",
+        "ipa": "/pleɪs/"
+      },
+      {
+        "no": 68,
+        "unit": 3,
+        "en": "trip",
+        "cn": "旅行;出行",
+        "ipa": "/trɪp/"
+      },
+      {
+        "no": 69,
+        "unit": 3,
+        "en": "start",
+        "cn": "开始",
+        "ipa": "/stɑːt/"
+      },
+      {
+        "no": 70,
+        "unit": 3,
+        "en": "cheer",
+        "cn": "欢呼;加油",
+        "ipa": "/tʃɪə(r)/"
+      },
+      {
+        "no": 71,
+        "unit": 3,
+        "en": "at last",
+        "cn": "终于;最终",
+        "ipa": "/æt lɑːst/"
+      },
+      {
+        "no": 72,
+        "unit": 3,
+        "en": "back",
+        "cn": "回原处;恢复原状",
+        "ipa": "/bæk/"
+      },
+      {
+        "no": 73,
+        "unit": 3,
+        "en": "New Year's Day",
+        "cn": "元旦",
+        "ipa": "/njuː jɪəz deɪ/"
+      },
+      {
+        "no": 74,
+        "unit": 3,
+        "en": "first",
+        "cn": "第一;第一次",
+        "ipa": "/fɜːst/"
+      },
+      {
+        "no": 75,
+        "unit": 3,
+        "en": "usually",
+        "cn": "通常",
+        "ipa": "/ˈjuːʒuəli; ˈjuːʒəli/"
+      },
+      {
+        "no": 76,
+        "unit": 4,
+        "en": "hometown",
+        "cn": "家乡",
+        "ipa": "/ˈhəʊmtaʊn/"
+      },
+      {
+        "no": 77,
+        "unit": 4,
+        "en": "Tree Planting Day",
+        "cn": "植树节",
+        "ipa": "/triː ˈplɑːntɪŋ deɪ/"
+      },
+      {
+        "no": 78,
+        "unit": 4,
+        "en": "plant",
+        "cn": "种植",
+        "ipa": "/plɑːnt/"
+      },
+      {
+        "no": 79,
+        "unit": 4,
+        "en": "plant",
+        "cn": "植物",
+        "ipa": "/plɑːnt/"
+      },
+      {
+        "no": 80,
+        "unit": 4,
+        "en": "Children's Day",
+        "cn": "儿童节",
+        "ipa": "/ˈtʃɪldrənz deɪ/"
+      },
+      {
+        "no": 81,
+        "unit": 4,
+        "en": "children",
+        "cn": "儿童;小孩",
+        "ipa": "/ˈtʃɪldrən/"
+      },
+      {
+        "no": 82,
+        "unit": 4,
+        "en": "Teachers' Day",
+        "cn": "教师节",
+        "ipa": "/ˈtiːtʃəz deɪ/"
+      },
+      {
+        "no": 83,
+        "unit": 4,
+        "en": "flag-raising",
+        "cn": "升旗",
+        "ipa": "/flæɡ ˈreɪzɪŋ/"
+      },
+      {
+        "no": 84,
+        "unit": 4,
+        "en": "motherland",
+        "cn": "祖国",
+        "ipa": "/ˈmʌðəlænd/"
+      },
+      {
+        "no": 85,
+        "unit": 4,
+        "en": "date",
+        "cn": "日期",
+        "ipa": "/deɪt/"
+      },
+      {
+        "no": 86,
+        "unit": 4,
+        "en": "celebrate",
+        "cn": "庆祝",
+        "ipa": "/ˈselɪbreɪt/"
+      },
+      {
+        "no": 87,
+        "unit": 4,
+        "en": "difficult",
+        "cn": "困难的",
+        "ipa": "/ˈdɪfɪkəlt/"
+      },
+      {
+        "no": 88,
+        "unit": 4,
+        "en": "find",
+        "cn": "发现;找到",
+        "ipa": "/faɪnd/"
+      },
+      {
+        "no": 89,
+        "unit": 4,
+        "en": "calendar",
+        "cn": "日历",
+        "ipa": "/ˈkælɪndə(r)/"
+      },
+      {
+        "no": 90,
+        "unit": 4,
+        "en": "Mother's Day",
+        "cn": "母亲节",
+        "ipa": "/ˈmʌðəz deɪ/"
+      },
+      {
+        "no": 91,
+        "unit": 4,
+        "en": "give",
+        "cn": "交给;赠送;提供",
+        "ipa": "/ɡɪv/"
+      },
+      {
+        "no": 92,
+        "unit": 4,
+        "en": "paper",
+        "cn": "纸",
+        "ipa": "/ˈpeɪpə(r)/"
+      },
+      {
+        "no": 93,
+        "unit": 4,
+        "en": "hug",
+        "cn": "拥抱",
+        "ipa": "/hʌɡ/"
+      },
+      {
+        "no": 94,
+        "unit": 4,
+        "en": "lost",
+        "cn": "迷路的;丢失的",
+        "ipa": "/lɒst/"
+      },
+      {
+        "no": 95,
+        "unit": 4,
+        "en": "write",
+        "cn": "书写;写字",
+        "ipa": "/raɪt/"
+      },
+      {
+        "no": 96,
+        "unit": 4,
+        "en": "letter",
+        "cn": "信;字母",
+        "ipa": "/ˈletə(r)/"
+      },
+      {
+        "no": 97,
+        "unit": 4,
+        "en": "visit",
+        "cn": "参观;拜访",
+        "ipa": "/ˈvɪzɪt/"
+      },
+      {
+        "no": 98,
+        "unit": 4,
+        "en": "the West Lake",
+        "cn": "西湖",
+        "ipa": "/ðə west leɪk/"
+      },
+      {
+        "no": 99,
+        "unit": 4,
+        "en": "famous",
+        "cn": "著名的",
+        "ipa": "/ˈfeɪməs/"
+      },
+      {
+        "no": 100,
+        "unit": 4,
+        "en": "its",
+        "cn": "它的",
+        "ipa": "/ɪts/"
+      },
+      {
+        "no": 101,
+        "unit": 5,
+        "en": "amazing",
+        "cn": "令人惊叹的",
+        "ipa": "/əˈmeɪzɪŋ/"
+      },
+      {
+        "no": 102,
+        "unit": 5,
+        "en": "sight",
+        "cn": "名胜;风景",
+        "ipa": "/saɪt/"
+      },
+      {
+        "no": 103,
+        "unit": 5,
+        "en": "such as",
+        "cn": "例如",
+        "ipa": "/sʌtʃ æz/"
+      },
+      {
+        "no": 104,
+        "unit": 5,
+        "en": "pagoda",
+        "cn": "塔;宝塔",
+        "ipa": "/pəˈɡəʊdə/"
+      },
+      {
+        "no": 105,
+        "unit": 5,
+        "en": "village",
+        "cn": "乡村",
+        "ipa": "/ˈvɪlɪdʒ/"
+      },
+      {
+        "no": 106,
+        "unit": 5,
+        "en": "tea",
+        "cn": "茶",
+        "ipa": "/tiː/"
+      },
+      {
+        "no": 107,
+        "unit": 5,
+        "en": "delicious",
+        "cn": "美味的",
+        "ipa": "/dɪˈlɪʃəs/"
+      },
+      {
+        "no": 108,
+        "unit": 5,
+        "en": "dream",
+        "cn": "梦想",
+        "ipa": "/driːm/"
+      },
+      {
+        "no": 109,
+        "unit": 5,
+        "en": "dream",
+        "cn": "做梦",
+        "ipa": "/driːm/"
+      },
+      {
+        "no": 110,
+        "unit": 5,
+        "en": "man",
+        "cn": "男人;人类",
+        "ipa": "/mæn/"
+      },
+      {
+        "no": 111,
+        "unit": 5,
+        "en": "fireman",
+        "cn": "消防队员",
+        "ipa": "/ˈfaɪəmən/"
+      },
+      {
+        "no": 112,
+        "unit": 5,
+        "en": "fire",
+        "cn": "火;开火",
+        "ipa": "/ˈfaɪə(r)/"
+      },
+      {
+        "no": 113,
+        "unit": 5,
+        "en": "keep",
+        "cn": "保持;继续",
+        "ipa": "/kiːp/"
+      },
+      {
+        "no": 114,
+        "unit": 5,
+        "en": "safe",
+        "cn": "安全的",
+        "ipa": "/seɪf/"
+      },
+      {
+        "no": 115,
+        "unit": 5,
+        "en": "woman",
+        "cn": "成年女子;妇女",
+        "ipa": "/ˈwʊmən/"
+      },
+      {
+        "no": 116,
+        "unit": 5,
+        "en": "hard",
+        "cn": "努力地",
+        "ipa": "/hɑːd/"
+      },
+      {
+        "no": 117,
+        "unit": 5,
+        "en": "hard",
+        "cn": "硬的,困难的",
+        "ipa": "/hɑːd/"
+      },
+      {
+        "no": 118,
+        "unit": 5,
+        "en": "patient",
+        "cn": "病人",
+        "ipa": "/ˈpeɪʃ(ə)nt/"
+      },
+      {
+        "no": 119,
+        "unit": 5,
+        "en": "patient",
+        "cn": "有耐心的",
+        "ipa": "/ˈpeɪʃ(ə)nt/"
+      },
+      {
+        "no": 120,
+        "unit": 5,
+        "en": "police officer",
+        "cn": "警察",
+        "ipa": "/pəˈliːs ˈɒfɪsə(r)/"
+      },
+      {
+        "no": 121,
+        "unit": 5,
+        "en": "player",
+        "cn": "运动员",
+        "ipa": "/ˈpleɪə(r)/"
+      },
+      {
+        "no": 122,
+        "unit": 5,
+        "en": "strong",
+        "cn": "强壮的",
+        "ipa": "/strɒŋ/"
+      },
+      {
+        "no": 123,
+        "unit": 5,
+        "en": "astronaut",
+        "cn": "宇航员",
+        "ipa": "/ˈæstrənɔːt/"
+      },
+      {
+        "no": 124,
+        "unit": 5,
+        "en": "study",
+        "cn": "学习",
+        "ipa": "/ˈstʌdi/"
+      },
+      {
+        "no": 125,
+        "unit": 5,
+        "en": "study",
+        "cn": "书房",
+        "ipa": "/ˈstʌdi/"
+      },
+      {
+        "no": 126,
+        "unit": 6,
+        "en": "space",
+        "cn": "空间;太空",
+        "ipa": "/speɪs/"
+      },
+      {
+        "no": 127,
+        "unit": 6,
+        "en": "grow",
+        "cn": "种植;生长",
+        "ipa": "/ɡrəʊ/"
+      },
+      {
+        "no": 128,
+        "unit": 6,
+        "en": "Mrs.",
+        "cn": "太太;夫人",
+        "ipa": "/ˈmɪsɪz/"
+      },
+      {
+        "no": 129,
+        "unit": 6,
+        "en": "restaurant",
+        "cn": "餐馆;餐厅",
+        "ipa": "/ˈrestrɒnt/"
+      },
+      {
+        "no": 130,
+        "unit": 6,
+        "en": "scientist",
+        "cn": "科学家",
+        "ipa": "/ˈsaɪəntɪst/"
+      },
+      {
+        "no": 131,
+        "unit": 6,
+        "en": "lab",
+        "cn": "实验室",
+        "ipa": "/læb/"
+      },
+      {
+        "no": 132,
+        "unit": 6,
+        "en": "early",
+        "cn": "早的;早到的",
+        "ipa": "/ˈɜːli/"
+      },
+      {
+        "no": 133,
+        "unit": 6,
+        "en": "late",
+        "cn": "迟;晚",
+        "ipa": "/leɪt/"
+      },
+      {
+        "no": 134,
+        "unit": 6,
+        "en": "storyteller",
+        "cn": "讲故事的人",
+        "ipa": "/ˈstɔːritelə(r)/"
+      },
+      {
+        "no": 135,
+        "unit": 6,
+        "en": "the USA",
+        "cn": "美国",
+        "ipa": "/ðə ˌjuː es ˈeɪ/"
+      },
+      {
+        "no": 136,
+        "unit": 6,
+        "en": "culture",
+        "cn": "文化",
+        "ipa": "/ˈkʌltʃə(r)/"
+      },
+      {
+        "no": 137,
+        "unit": 6,
+        "en": "world",
+        "cn": "世界",
+        "ipa": "/wɜːld/"
+      },
+      {
+        "no": 138,
+        "unit": 6,
+        "en": "Beijing roast duck",
+        "cn": "北京烤鸭",
+        "ipa": "/beɪˈdʒɪŋ rəʊst dʌk/"
+      },
+      {
+        "no": 139,
+        "unit": 6,
+        "en": "hot pot",
+        "cn": "火锅",
+        "ipa": "/hɒt pɒt/"
+      },
+      {
+        "no": 140,
+        "unit": 6,
+        "en": "style",
+        "cn": "样式;款式",
+        "ipa": "/staɪl/"
+      },
+      {
+        "no": 141,
+        "unit": 6,
+        "en": "the Great Wall",
+        "cn": "长城",
+        "ipa": "/ðə ɡreɪt wɔːl/"
+      },
+      {
+        "no": 142,
+        "unit": 6,
+        "en": "the Yellow River",
+        "cn": "黄河",
+        "ipa": "/ðə ˈjeləʊ ˈrɪvə(r)/"
+      }
+    ]
+  },
+  {
+    "semester": "六年级上册",
+    "words": [
+      {
+        "no": 1,
+        "unit": 1,
+        "en": "event",
+        "cn": "事件；赛事",
+        "ipa": "/ɪˈvent/"
+      },
+      {
+        "no": 2,
+        "unit": 1,
+        "en": "skill",
+        "cn": "技能；技巧",
+        "ipa": "/skɪl/"
+      },
+      {
+        "no": 3,
+        "unit": 1,
+        "en": "Olympics",
+        "cn": "奥林匹克运动会",
+        "ipa": "/əˈlɪmpɪks/"
+      },
+      {
+        "no": 4,
+        "unit": 1,
+        "en": "began",
+        "cn": "（begin的过去式）开始",
+        "ipa": "/bɪˈɡæn/"
+      },
+      {
+        "no": 5,
+        "unit": 1,
+        "en": "slogan",
+        "cn": "口号；标语",
+        "ipa": "/ˈsləʊɡən/"
+      },
+      {
+        "no": 6,
+        "unit": 1,
+        "en": "popular",
+        "cn": "受欢迎的",
+        "ipa": "/ˈpɒpjələ(r)/"
+      },
+      {
+        "no": 7,
+        "unit": 1,
+        "en": "future",
+        "cn": "将来",
+        "ipa": "/ˈfjuːtʃə(r)/"
+      },
+      {
+        "no": 8,
+        "unit": 1,
+        "en": "medal",
+        "cn": "奖牌",
+        "ipa": "/ˈmedl/"
+      },
+      {
+        "no": 9,
+        "unit": 1,
+        "en": "gold",
+        "cn": "金；金色",
+        "ipa": "/ɡəʊld/"
+      },
+      {
+        "no": 10,
+        "unit": 1,
+        "en": "bronze",
+        "cn": "青铜；青铜色",
+        "ipa": "/brɒnz/"
+      },
+      {
+        "no": 11,
+        "unit": 1,
+        "en": "fitness",
+        "cn": "健壮；健康",
+        "ipa": "/ˈfɪtnəs/"
+      },
+      {
+        "no": 12,
+        "unit": 1,
+        "en": "second",
+        "cn": "第二；第二的",
+        "ipa": "/ˈsekənd/"
+      },
+      {
+        "no": 13,
+        "unit": 1,
+        "en": "member",
+        "cn": "成员",
+        "ipa": "/ˈmembə(r)/"
+      },
+      {
+        "no": 14,
+        "unit": 1,
+        "en": "Olympic",
+        "cn": "奥林匹克运动会的",
+        "ipa": "/əˈlɪmpɪk/"
+      },
+      {
+        "no": 15,
+        "unit": 1,
+        "en": "host",
+        "cn": "主人；主办",
+        "ipa": "/həʊst/"
+      },
+      {
+        "no": 16,
+        "unit": 1,
+        "en": "answer",
+        "cn": "回答",
+        "ipa": "/ˈɑːnsə(r)/"
+      },
+      {
+        "no": 17,
+        "unit": 1,
+        "en": "were",
+        "cn": "（are的过去式）是",
+        "ipa": "/wɜː(r)/"
+      },
+      {
+        "no": 18,
+        "unit": 1,
+        "en": "exciting",
+        "cn": "令人兴奋的",
+        "ipa": "/ɪkˈsaɪtɪŋ/"
+      },
+      {
+        "no": 19,
+        "unit": 1,
+        "en": "was",
+        "cn": "（is的过去式）是",
+        "ipa": "/wɒz/"
+      },
+      {
+        "no": 20,
+        "unit": 1,
+        "en": "won",
+        "cn": "（win的过去式）获胜；赢",
+        "ipa": "/wʌn/"
+      },
+      {
+        "no": 21,
+        "unit": 1,
+        "en": "silver",
+        "cn": "银；银色",
+        "ipa": "/ˈsɪlvə(r)/"
+      },
+      {
+        "no": 22,
+        "unit": 1,
+        "en": "national",
+        "cn": "国家的",
+        "ipa": "/ˈnæʃnəl/"
+      },
+      {
+        "no": 23,
+        "unit": 1,
+        "en": "logo",
+        "cn": "标志；标识",
+        "ipa": "/ˈləʊɡəʊ/"
+      },
+      {
+        "no": 24,
+        "unit": 1,
+        "en": "hiking",
+        "cn": "徒步旅行",
+        "ipa": "/ˈhaɪkɪŋ/"
+      },
+      {
+        "no": 25,
+        "unit": 1,
+        "en": "menu",
+        "cn": "菜单",
+        "ipa": "/ˈmenjuː/"
+      },
+      {
+        "no": 26,
+        "unit": 2,
+        "en": "ill",
+        "cn": "生病的；不适的",
+        "ipa": "/ɪl/"
+      },
+      {
+        "no": 27,
+        "unit": 2,
+        "en": "well",
+        "cn": "良好的；健康的",
+        "ipa": "/wel/"
+      },
+      {
+        "no": 28,
+        "unit": 2,
+        "en": "maybe",
+        "cn": "也许；可能",
+        "ipa": "/ˈmeɪbi/"
+      },
+      {
+        "no": 29,
+        "unit": 2,
+        "en": "check",
+        "cn": "检查；核实",
+        "ipa": "/tʃek/"
+      },
+      {
+        "no": 30,
+        "unit": 2,
+        "en": "health",
+        "cn": "健康",
+        "ipa": "/helθ/"
+      },
+      {
+        "no": 31,
+        "unit": 2,
+        "en": "fan",
+        "cn": "迷；爱好者",
+        "ipa": "/fæn/"
+      },
+      {
+        "no": 32,
+        "unit": 2,
+        "en": "hour",
+        "cn": "小时",
+        "ipa": "/ˈaʊə(r)/"
+      },
+      {
+        "no": 33,
+        "unit": 2,
+        "en": "tidy",
+        "cn": "整洁的；有序的",
+        "ipa": "/ˈtaɪdi/"
+      },
+      {
+        "no": 34,
+        "unit": 2,
+        "en": "matter",
+        "cn": "事情；情况",
+        "ipa": "/ˈmætə(r)/"
+      },
+      {
+        "no": 35,
+        "unit": 2,
+        "en": "bad",
+        "cn": "坏的",
+        "ipa": "/bæd/"
+      },
+      {
+        "no": 36,
+        "unit": 2,
+        "en": "headache",
+        "cn": "头疼",
+        "ipa": "/ˈhedeɪk/"
+      },
+      {
+        "no": 37,
+        "unit": 2,
+        "en": "fever",
+        "cn": "发烧",
+        "ipa": "/ˈfiːvə(r)/"
+      },
+      {
+        "no": 38,
+        "unit": 2,
+        "en": "medicine",
+        "cn": "药；医学",
+        "ipa": "/ˈmedsn/"
+      },
+      {
+        "no": 39,
+        "unit": 2,
+        "en": "always",
+        "cn": "总是；每次都",
+        "ipa": "/ˈɔːlweɪz/"
+      },
+      {
+        "no": 40,
+        "unit": 2,
+        "en": "tip",
+        "cn": "建议",
+        "ipa": "/tɪp/"
+      },
+      {
+        "no": 41,
+        "unit": 2,
+        "en": "habit",
+        "cn": "习惯",
+        "ipa": "/ˈhæbɪt/"
+      },
+      {
+        "no": 42,
+        "unit": 2,
+        "en": "manner",
+        "cn": "礼貌；礼仪",
+        "ipa": "/ˈmænə(r)/"
+      },
+      {
+        "no": 42,
+        "unit": 2,
+        "en": "fourth",
+        "cn": "第四；第四的",
+        "ipa": "/fɔːθ/"
+      },
+      {
+        "no": 43,
+        "unit": 2,
+        "en": "cup",
+        "cn": "杯子",
+        "ipa": "/kʌp/"
+      },
+      {
+        "no": 44,
+        "unit": 2,
+        "en": "bedroom",
+        "cn": "卧室",
+        "ipa": "/ˈbedruːm/"
+      },
+      {
+        "no": 45,
+        "unit": 2,
+        "en": "sure",
+        "cn": "当然",
+        "ipa": "/ʃʊə(r)/"
+      },
+      {
+        "no": 46,
+        "unit": 2,
+        "en": "mess",
+        "cn": "混乱；凌乱",
+        "ipa": "/mes/"
+      },
+      {
+        "no": 47,
+        "unit": 2,
+        "en": "swing",
+        "cn": "秋千",
+        "ipa": "/swɪŋ/"
+      },
+      {
+        "no": 48,
+        "unit": 2,
+        "en": "ouch",
+        "cn": "哎哟",
+        "ipa": "/aʊtʃ/"
+      },
+      {
+        "no": 49,
+        "unit": 2,
+        "en": "greet",
+        "cn": "问候；招呼",
+        "ipa": "/ɡriːt/"
+      },
+      {
+        "no": 50,
+        "unit": 2,
+        "en": "meal",
+        "cn": "一餐；饭",
+        "ipa": "/miːl/"
+      },
+      {
+        "no": 51,
+        "unit": 3,
+        "en": "dining table",
+        "cn": "餐桌",
+        "ipa": "/ˈdaɪnɪŋ ˈteɪbl/"
+      },
+      {
+        "no": 52,
+        "unit": 3,
+        "en": "guest",
+        "cn": "客人",
+        "ipa": "/ɡest/"
+      },
+      {
+        "no": 53,
+        "unit": 3,
+        "en": "bowl",
+        "cn": "碗",
+        "ipa": "/bəʊl/"
+      },
+      {
+        "no": 54,
+        "unit": 3,
+        "en": "chopstick",
+        "cn": "筷子",
+        "ipa": "/ˈtʃɒpstɪk/"
+      },
+      {
+        "no": 55,
+        "unit": 3,
+        "en": "middle",
+        "cn": "中间；中间的",
+        "ipa": "/ˈmɪdl/"
+      },
+      {
+        "no": 56,
+        "unit": 3,
+        "en": "drum",
+        "cn": "鼓",
+        "ipa": "/drʌm/"
+      },
+      {
+        "no": 57,
+        "unit": 3,
+        "en": "yourself",
+        "cn": "你自己",
+        "ipa": "/jɔːˈself/"
+      },
+      {
+        "no": 58,
+        "unit": 3,
+        "en": "pleasure",
+        "cn": "愉快；快乐",
+        "ipa": "/ˈpleʒə(r)/"
+      },
+      {
+        "no": 59,
+        "unit": 3,
+        "en": "borrow",
+        "cn": "借；借用",
+        "ipa": "/ˈbɒrəʊ/"
+      },
+      {
+        "no": 60,
+        "unit": 3,
+        "en": "carefully",
+        "cn": "小心地",
+        "ipa": "/ˈkeəfəli/"
+      },
+      {
+        "no": 61,
+        "unit": 3,
+        "en": "public",
+        "cn": "公众；公共的",
+        "ipa": "/ˈpʌblɪk/"
+      },
+      {
+        "no": 62,
+        "unit": 3,
+        "en": "off",
+        "cn": "从……去掉；离开",
+        "ipa": "/ɒf/"
+      },
+      {
+        "no": 63,
+        "unit": 3,
+        "en": "feed",
+        "cn": "喂养；饲养",
+        "ipa": "/fiːd/"
+      },
+      {
+        "no": 64,
+        "unit": 3,
+        "en": "did",
+        "cn": "（do的过去式）做；干",
+        "ipa": "/dɪd/"
+      },
+      {
+        "no": 65,
+        "unit": 3,
+        "en": "round",
+        "cn": "圆形的",
+        "ipa": "/raʊnd/"
+      },
+      {
+        "no": 66,
+        "unit": 3,
+        "en": "easily",
+        "cn": "容易地",
+        "ipa": "/ˈiːzɪli/"
+      },
+      {
+        "no": 67,
+        "unit": 3,
+        "en": "plate",
+        "cn": "盘；碟",
+        "ipa": "/pleɪt/"
+      },
+      {
+        "no": 68,
+        "unit": 3,
+        "en": "spoon",
+        "cn": "勺；匙",
+        "ipa": "/spuːn/"
+      },
+      {
+        "no": 69,
+        "unit": 3,
+        "en": "dish",
+        "cn": "菜肴",
+        "ipa": "/dɪʃ/"
+      },
+      {
+        "no": 70,
+        "unit": 3,
+        "en": "polite",
+        "cn": "礼貌的",
+        "ipa": "/pəˈlaɪt/"
+      },
+      {
+        "no": 71,
+        "unit": 3,
+        "en": "finish",
+        "cn": "完成",
+        "ipa": "/ˈfɪnɪʃ/"
+      },
+      {
+        "no": 72,
+        "unit": 3,
+        "en": "hardworking",
+        "cn": "努力的；勤劳的",
+        "ipa": "/ˌhɑːdˈwɜːkɪŋ/"
+      },
+      {
+        "no": 73,
+        "unit": 3,
+        "en": "soldier",
+        "cn": "士兵；军人",
+        "ipa": "/ˈsəʊldʒə(r)/"
+      },
+      {
+        "no": 74,
+        "unit": 3,
+        "en": "develop",
+        "cn": "（使）发展；（使）成长",
+        "ipa": "/dɪˈveləp/"
+      },
+      {
+        "no": 75,
+        "unit": 3,
+        "en": "aerospace",
+        "cn": "航空航天",
+        "ipa": "/ˈeərəʊspeɪs/"
+      },
+      {
+        "no": 76,
+        "unit": 4,
+        "en": "invention",
+        "cn": "发明；创造",
+        "ipa": "/ɪnˈvenʃn/"
+      },
+      {
+        "no": 77,
+        "unit": 4,
+        "en": "smart",
+        "cn": "聪明的",
+        "ipa": "/smɑːt/"
+      },
+      {
+        "no": 78,
+        "unit": 4,
+        "en": "invent",
+        "cn": "发明；创造",
+        "ipa": "/ɪnˈvent/"
+      },
+      {
+        "no": 79,
+        "unit": 4,
+        "en": "field",
+        "cn": "学科；领域",
+        "ipa": "/fiːld/"
+      },
+      {
+        "no": 80,
+        "unit": 4,
+        "en": "chemistry",
+        "cn": "化学",
+        "ipa": "/ˈkemɪstri/"
+      },
+      {
+        "no": 81,
+        "unit": 4,
+        "en": "traditional",
+        "cn": "传统的；习俗的",
+        "ipa": "/trəˈdɪʃənl/"
+      },
+      {
+        "no": 82,
+        "unit": 4,
+        "en": "free",
+        "cn": "免费的",
+        "ipa": "/friː/"
+      },
+      {
+        "no": 83,
+        "unit": 4,
+        "en": "primary",
+        "cn": "首要的；初级的",
+        "ipa": "/ˈpraɪməri/"
+      },
+      {
+        "no": 84,
+        "unit": 4,
+        "en": "most",
+        "cn": "最；最多",
+        "ipa": "/məʊst/"
+      },
+      {
+        "no": 85,
+        "unit": 4,
+        "en": "bring",
+        "cn": "带来",
+        "ipa": "/brɪŋ/"
+      },
+      {
+        "no": 86,
+        "unit": 4,
+        "en": "think",
+        "cn": "认为",
+        "ipa": "/θɪŋk/"
+      },
+      {
+        "no": 87,
+        "unit": 4,
+        "en": "country",
+        "cn": "国家",
+        "ipa": "/ˈkʌntri/"
+      },
+      {
+        "no": 88,
+        "unit": 4,
+        "en": "research",
+        "cn": "研究；调查",
+        "ipa": "/rɪˈsɜːtʃ/"
+      },
+      {
+        "no": 89,
+        "unit": 4,
+        "en": "satellite",
+        "cn": "人造卫星",
+        "ipa": "/ˈsætəlaɪt/"
+      },
+      {
+        "no": 90,
+        "unit": 4,
+        "en": "physicist",
+        "cn": "物理学家",
+        "ipa": "/ˈfɪzɪsɪst/"
+      },
+      {
+        "no": 91,
+        "unit": 4,
+        "en": "inventor",
+        "cn": "发明者；发明家",
+        "ipa": "/ɪnˈventə(r)/"
+      },
+      {
+        "no": 92,
+        "unit": 4,
+        "en": "American",
+        "cn": "美国的；美国人",
+        "ipa": "/əˈmerɪkən/"
+      },
+      {
+        "no": 93,
+        "unit": 4,
+        "en": "prize",
+        "cn": "奖品；奖赏",
+        "ipa": "/praɪz/"
+      },
+      {
+        "no": 94,
+        "unit": 4,
+        "en": "physics",
+        "cn": "物理",
+        "ipa": "/ˈfɪzɪks/"
+      },
+      {
+        "no": 95,
+        "unit": 4,
+        "en": "born",
+        "cn": "出生",
+        "ipa": "/bɔːn/"
+      },
+      {
+        "no": 96,
+        "unit": 4,
+        "en": "education",
+        "cn": "教育",
+        "ipa": "/ˌedʒuˈkeɪʃn/"
+      },
+      {
+        "no": 97,
+        "unit": 4,
+        "en": "everyone",
+        "cn": "每个人",
+        "ipa": "/ˈevriwʌn/"
+      },
+      {
+        "no": 98,
+        "unit": 4,
+        "en": "uniform",
+        "cn": "制服",
+        "ipa": "/ˈjuːnɪfɔːm/"
+      },
+      {
+        "no": 99,
+        "unit": 4,
+        "en": "delivery",
+        "cn": "递送；投递",
+        "ipa": "/dɪˈlɪvəri/"
+      },
+      {
+        "no": 100,
+        "unit": 4,
+        "en": "ordinary",
+        "cn": "普通的",
+        "ipa": "/ˈɔːdnri/"
+      },
+      {
+        "no": 101,
+        "unit": 5,
+        "en": "achievement",
+        "cn": "完成；达到；成就",
+        "ipa": "/əˈtʃiːvmənt/"
+      },
+      {
+        "no": 102,
+        "unit": 5,
+        "en": "advice",
+        "cn": "忠告；建议",
+        "ipa": "/ədˈvaɪs/"
+      },
+      {
+        "no": 103,
+        "unit": 5,
+        "en": "along",
+        "cn": "沿着",
+        "ipa": "/əˈlɒŋ/"
+      },
+      {
+        "no": 104,
+        "unit": 5,
+        "en": "Australia",
+        "cn": "澳大利亚",
+        "ipa": "/ɒˈstreɪliə/"
+      },
+      {
+        "no": 105,
+        "unit": 5,
+        "en": "bedtime",
+        "cn": "就寝时间",
+        "ipa": "/ˈbedtaɪm/"
+      },
+      {
+        "no": 106,
+        "unit": 5,
+        "en": "birthplace",
+        "cn": "出生地",
+        "ipa": "/ˈbɜːθpleɪs/"
+      },
+      {
+        "no": 107,
+        "unit": 5,
+        "en": "brave",
+        "cn": "勇敢的",
+        "ipa": "/breɪv/"
+      },
+      {
+        "no": 108,
+        "unit": 5,
+        "en": "candy",
+        "cn": "糖果",
+        "ipa": "/ˈkændi/"
+      },
+      {
+        "no": 109,
+        "unit": 5,
+        "en": "clever",
+        "cn": "聪明的",
+        "ipa": "/ˈklevə(r)/"
+      },
+      {
+        "no": 110,
+        "unit": 5,
+        "en": "cream",
+        "cn": "奶油",
+        "ipa": "/kriːm/"
+      },
+      {
+        "no": 111,
+        "unit": 5,
+        "en": "diary",
+        "cn": "日记",
+        "ipa": "/ˈdaɪəri/"
+      },
+      {
+        "no": 112,
+        "unit": 5,
+        "en": "drew",
+        "cn": "（draw的过去式）画；绘画",
+        "ipa": "/druː/"
+      },
+      {
+        "no": 113,
+        "unit": 5,
+        "en": "duty",
+        "cn": "义务；责任",
+        "ipa": "/ˈdjuːti/"
+      },
+      {
+        "no": 114,
+        "unit": 5,
+        "en": "flag",
+        "cn": "旗；旗帜",
+        "ipa": "/flæɡ/"
+      },
+      {
+        "no": 115,
+        "unit": 5,
+        "en": "fork",
+        "cn": "叉子",
+        "ipa": "/fɔːk/"
+      },
+      {
+        "no": 116,
+        "unit": 5,
+        "en": "held",
+        "cn": "（hold的过去式）举办",
+        "ipa": "/held/"
+      },
+      {
+        "no": 117,
+        "unit": 5,
+        "en": "important",
+        "cn": "重要的",
+        "ipa": "/ɪmˈpɔːtnt/"
+      },
+      {
+        "no": 118,
+        "unit": 5,
+        "en": "invite",
+        "cn": "邀请",
+        "ipa": "/ɪnˈvaɪt/"
+      },
+      {
+        "no": 119,
+        "unit": 5,
+        "en": "juicy",
+        "cn": "多汁的",
+        "ipa": "/ˈdʒuːsi/"
+      },
+      {
+        "no": 120,
+        "unit": 5,
+        "en": "lamp",
+        "cn": "灯",
+        "ipa": "/læmp/"
+      },
+      {
+        "no": 121,
+        "unit": 5,
+        "en": "meter",
+        "cn": "米",
+        "ipa": "/ˈmiːtə(r)/"
+      },
+      {
+        "no": 122,
+        "unit": 5,
+        "en": "never",
+        "cn": "决不；永不",
+        "ipa": "/ˈnevə(r)/"
+      },
+      {
+        "no": 123,
+        "unit": 5,
+        "en": "nursing",
+        "cn": "护理工作",
+        "ipa": "/ˈnɜːsɪŋ/"
+      },
+      {
+        "no": 124,
+        "unit": 5,
+        "en": "passage",
+        "cn": "一段；一节",
+        "ipa": "/ˈpæsɪdʒ/"
+      },
+      {
+        "no": 125,
+        "unit": 5,
+        "en": "poster",
+        "cn": "海报",
+        "ipa": "/ˈpəʊstə(r)/"
+      },
+      {
+        "no": 126,
+        "unit": 6,
+        "en": "protect",
+        "cn": "保护",
+        "ipa": "/prəˈtekt/"
+      },
+      {
+        "no": 127,
+        "unit": 6,
+        "en": "rack",
+        "cn": "支架；架子",
+        "ipa": "/ræk/"
+      },
+      {
+        "no": 128,
+        "unit": 6,
+        "en": "return",
+        "cn": "回；回到",
+        "ipa": "/rɪˈtɜːn/"
+      },
+      {
+        "no": 129,
+        "unit": 6,
+        "en": "ski",
+        "cn": "滑雪",
+        "ipa": "/skiː/"
+      },
+      {
+        "no": 130,
+        "unit": 6,
+        "en": "snowboard",
+        "cn": "滑雪板",
+        "ipa": "/ˈsnəʊbɔːd/"
+      },
+      {
+        "no": 131,
+        "unit": 6,
+        "en": "teeth",
+        "cn": "（tooth.的复数）牙齿",
+        "ipa": "/tiːθ/"
+      },
+      {
+        "no": 132,
+        "unit": 6,
+        "en": "till",
+        "cn": "直到……为止",
+        "ipa": "/tɪl/"
+      },
+      {
+        "no": 133,
+        "unit": 6,
+        "en": "toothache",
+        "cn": "牙痛",
+        "ipa": "/ˈtuːθeɪk/"
+      },
+      {
+        "no": 134,
+        "unit": 6,
+        "en": "toothpaste",
+        "cn": "牙膏",
+        "ipa": "/ˈtuːθpeɪst/"
+      },
+      {
+        "no": 135,
+        "unit": 6,
+        "en": "truck",
+        "cn": "卡车",
+        "ipa": "/trʌk/"
+      },
+      {
+        "no": 136,
+        "unit": 6,
+        "en": "warmly",
+        "cn": "热情地；温暖地",
+        "ipa": "/ˈwɔːmli/"
+      },
+      {
+        "no": 137,
+        "unit": 6,
+        "en": "while",
+        "cn": "一段时间；当……时候",
+        "ipa": "/waɪl/"
+      },
+      {
+        "no": 138,
+        "unit": 6,
+        "en": "writer",
+        "cn": "作家；作者",
+        "ipa": "/ˈraɪtə(r)/"
+      },
+      {
+        "no": 139,
+        "unit": 6,
+        "en": "yesterday",
+        "cn": "昨天",
+        "ipa": "/ˈjestədeɪ/"
+      },
+      {
+        "no": 140,
+        "unit": 6,
+        "en": "across",
+        "cn": "穿过；越过",
+        "ipa": "/əˈkrɒs/"
+      },
+      {
+        "no": 141,
+        "unit": 6,
+        "en": "aha",
+        "cn": "啊哈",
+        "ipa": "/ɑːˈhɑː/"
+      },
+      {
+        "no": 142,
+        "unit": 6,
+        "en": "Asian",
+        "cn": "亚洲",
+        "ipa": "/ˈeɪʃn/"
+      },
+      {
+        "no": 143,
+        "unit": 6,
+        "en": "base",
+        "cn": "基础；根据",
+        "ipa": "/beɪs/"
+      },
+      {
+        "no": 144,
+        "unit": 6,
+        "en": "bill",
+        "cn": "账单",
+        "ipa": "/bɪl/"
+      },
+      {
+        "no": 145,
+        "unit": 6,
+        "en": "bottle",
+        "cn": "瓶子",
+        "ipa": "/ˈbɒtl/"
+      },
+      {
+        "no": 146,
+        "unit": 6,
+        "en": "brush",
+        "cn": "刷；刷语",
+        "ipa": "/brʌʃ/"
+      },
+      {
+        "no": 147,
+        "unit": 6,
+        "en": "center",
+        "cn": "中心",
+        "ipa": "/ˈsentə(r)/"
+      },
+      {
+        "no": 148,
+        "unit": 6,
+        "en": "cola",
+        "cn": "可乐",
+        "ipa": "/ˈkəʊlə/"
+      },
+      {
+        "no": 149,
+        "unit": 6,
+        "en": "cry",
+        "cn": "哭；呼喊",
+        "ipa": "/kraɪ/"
+      },
+      {
+        "no": 150,
+        "unit": 6,
+        "en": "done",
+        "cn": "（do的过去分词）做；干",
+        "ipa": "/dʌn/"
+      },
+      {
+        "no": 151,
+        "unit": 7,
+        "en": "drive",
+        "cn": "开车；驾驶",
+        "ipa": "/draɪv/"
+      },
+      {
+        "no": 152,
+        "unit": 7,
+        "en": "easier",
+        "cn": "（easy的比较级）容易的",
+        "ipa": "/ˈiːziə(r)/"
+      },
+      {
+        "no": 153,
+        "unit": 7,
+        "en": "Florence",
+        "cn": "佛罗伦萨",
+        "ipa": "/ˈflɒrəns/"
+      },
+      {
+        "no": 154,
+        "unit": 7,
+        "en": "heart",
+        "cn": "心；心脏",
+        "ipa": "/hɑːt/"
+      },
+      {
+        "no": 155,
+        "unit": 7,
+        "en": "illness",
+        "cn": "病；疾病",
+        "ipa": "/ˈɪlnəs/"
+      },
+      {
+        "no": 156,
+        "unit": 7,
+        "en": "international",
+        "cn": "国际的",
+        "ipa": "/ˌɪntəˈnæʃnəl/"
+      },
+      {
+        "no": 157,
+        "unit": 7,
+        "en": "Italy",
+        "cn": "意大利",
+        "ipa": "/ˈɪtəli/"
+      },
+      {
+        "no": 158,
+        "unit": 7,
+        "en": "lady",
+        "cn": "女士",
+        "ipa": "/ˈleɪdi/"
+      },
+      {
+        "no": 159,
+        "unit": 7,
+        "en": "long jump",
+        "cn": "跳远",
+        "ipa": "/lɒŋ dʒʌmp/"
+      },
+      {
+        "no": 160,
+        "unit": 7,
+        "en": "mind",
+        "cn": "头脑；思想",
+        "ipa": "/maɪnd/"
+      },
+      {
+        "no": 161,
+        "unit": 7,
+        "en": "noise",
+        "cn": "噪音",
+        "ipa": "/nɔɪz/"
+      },
+      {
+        "no": 162,
+        "unit": 7,
+        "en": "onto",
+        "cn": "在……之上",
+        "ipa": "/ˈɒntuː/"
+      },
+      {
+        "no": 163,
+        "unit": 7,
+        "en": "person",
+        "cn": "人",
+        "ipa": "/ˈpɜːsn/"
+      },
+      {
+        "no": 164,
+        "unit": 7,
+        "en": "program",
+        "cn": "项目；节目；计划",
+        "ipa": "/ˈprəʊɡræm/"
+      },
+      {
+        "no": 165,
+        "unit": 7,
+        "en": "questionnaire",
+        "cn": "问卷调查",
+        "ipa": "/ˌkwestʃəˈneə(r)/"
+      },
+      {
+        "no": 166,
+        "unit": 7,
+        "en": "reference",
+        "cn": "参考；参照",
+        "ipa": "/ˈrefrəns/"
+      },
+      {
+        "no": 167,
+        "unit": 7,
+        "en": "send",
+        "cn": "邮寄；发送",
+        "ipa": "/send/"
+      },
+      {
+        "no": 168,
+        "unit": 7,
+        "en": "slide",
+        "cn": "滑梯",
+        "ipa": "/slaɪd/"
+      },
+      {
+        "no": 169,
+        "unit": 7,
+        "en": "successful",
+        "cn": "成功的",
+        "ipa": "/səkˈsesfl/"
+      },
+      {
+        "no": 170,
+        "unit": 7,
+        "en": "telephone",
+        "cn": "电话",
+        "ipa": "/ˈtelɪfəʊn/"
+      },
+      {
+        "no": 171,
+        "unit": 7,
+        "en": "took",
+        "cn": "（take 的过去式）带走；拿走；乘坐（交通工具）",
+        "ipa": "/tʊk/"
+      },
+      {
+        "no": 172,
+        "unit": 7,
+        "en": "toothbrush",
+        "cn": "牙刷",
+        "ipa": "/ˈtuːθbrʌʃ/"
+      },
+      {
+        "no": 173,
+        "unit": 7,
+        "en": "trousers",
+        "cn": "长裤",
+        "ipa": "/ˈtraʊzəz/"
+      },
+      {
+        "no": 174,
+        "unit": 7,
+        "en": "value",
+        "cn": "价值；估价",
+        "ipa": "/ˈvæljuː/"
+      },
+      {
+        "no": 175,
+        "unit": 7,
+        "en": "went",
+        "cn": "（go的过去式）去；走",
+        "ipa": "/went/"
+      },
+      {
+        "no": 176,
+        "unit": 8,
+        "en": "workplace",
+        "cn": "工作地点",
+        "ipa": "/ˈwɜːkpleɪs/"
+      },
+      {
+        "no": 177,
+        "unit": 8,
+        "en": "wrote",
+        "cn": "（write的过去式）写；写作",
+        "ipa": "/rəʊt/"
+      },
+      {
+        "no": 178,
+        "unit": 8,
+        "en": "youth",
+        "cn": "青年；青年时期",
+        "ipa": "/juːθ/"
       }
     ]
   }
 ];
+    // 用于抽干扰项的扁平词表
+    const allWords = allData.flatMap(s => s.words.map(w => ({...w, semester: s.semester})));
 
-    // 用于抽干扰项
-    const allWords = allData.flatMap(s => s.words.map(w => ({ ...w, semester: s.semester })));
-
-    // 状态
-    const STORAGE_KEY = "fujian_vocab_v2";
     let currentSemester = allData[0].semester;
     let mode = "en2cn";
     let selectedUnits = new Set();
     let queue = [];
     let index = 0;
     let streak = 0;
-    let currentQuestion = null;
     let answered = false;
+    let currentQuestion = null;
     let mistakes = [];
 
+    function saveMistakes() {
+      localStorage.setItem("fujian_vocab_mistakes", JSON.stringify(mistakes));
+    }
     function loadMistakes() {
-      try { mistakes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { mistakes = []; }
-    }
-    function saveMistakes() { localStorage.setItem(STORAGE_KEY, JSON.stringify(mistakes)); }
-
-    function getSemesterWords(semester) {
-      return allData.find(s => s.semester === semester)?.words || [];
-    }
-    function getCurrentUnits() {
-      const ws = getSemesterWords(currentSemester);
-      return [...new Set(ws.map(w => w.unit))].sort((a,b) => a-b);
+      try {
+        const raw = localStorage.getItem("fujian_vocab_mistakes");
+        if (raw) mistakes = JSON.parse(raw);
+      } catch {}
     }
 
     function shuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+        [a[i], a[j]] = [a[j], a[i]];
       }
-      return arr;
+      return a;
+    }
+
+    function getSemesterWords(sem) {
+      const s = allData.find(x => x.semester === sem);
+      return s ? s.words : [];
+    }
+
+    function getCurrentUnits() {
+      const units = [...new Set(getSemesterWords(currentSemester).map(w => w.unit))].sort((a,b)=>a-b);
+      return units;
     }
 
     function showToast(msg) {
@@ -5365,11 +6261,9 @@ const allData = [
     }
 
     function renderSemesterFilters() {
-      const container = document.getElementById("semester-select");
-      const wlContainer = document.getElementById("wordlist-semester-select");
-      const html = allData.map(s => `<button class="${s.semester === currentSemester ? 'active' : ''}" onclick="setSemester('${s.semester.replace(/'/g, "\\'")}')">${s.semester}</button>`).join("");
-      container.innerHTML = html;
-      wlContainer.innerHTML = html;
+      const html = allData.map(s => `<button class="${s.semester === currentSemester ? 'active' : ''}" onclick="setSemester('${s.semester.replace(/'/g, "\'")}')">${s.semester}</button>`).join("");
+      document.getElementById("semester-select").innerHTML = html;
+      document.getElementById("wordlist-semester-select").innerHTML = html;
     }
 
     function setSemester(sem) {
@@ -5382,12 +6276,10 @@ const allData = [
     }
 
     function renderUnitFilters() {
-      const container = document.getElementById("unit-filter");
-      const wlContainer = document.getElementById("wordlist-unit-filter");
       const units = getCurrentUnits();
       const html = units.map(u => `<button class="${selectedUnits.has(u) ? 'active' : ''}" data-unit="${u}" onclick="toggleUnit(${u})">第 ${u} 组</button>`).join("");
-      container.innerHTML = html;
-      wlContainer.innerHTML = html;
+      document.getElementById("unit-filter").innerHTML = html;
+      document.getElementById("wordlist-unit-filter").innerHTML = html;
     }
 
     function toggleUnit(u) {
@@ -5423,31 +6315,36 @@ const allData = [
       document.getElementById("progress-fill").style.width = pct + "%";
     }
 
-    // 发音：优先系统语音，否则在线音频
     let audio = new Audio();
+    let speakQueue = [];
     function speak(text) {
       if (!text) return;
-      // 1. 尝试 Web Speech API
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "en-GB";
-        u.rate = 0.9;
-        // 尽量选英式男/女声
-        const voices = window.speechSynthesis.getVoices();
-        const enVoice = voices.find(v => v.lang === "en-GB") || voices.find(v => v.lang.startsWith("en"));
-        if (enVoice) u.voice = enVoice;
-        window.speechSynthesis.speak(u);
-      }
-      // 2. 同时播放在线音频作为 fallback / 增强
+      speakQueue.forEach(t => clearTimeout(t));
+      speakQueue = [];
       try {
         audio.pause();
         audio.src = "https://dict.youdao.com/dictvoice?type=1&audio=" + encodeURIComponent(text);
         audio.play().catch(() => {});
       } catch {}
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const voices = window.speechSynthesis.getVoices();
+        const first = voices.find(v => v.lang.startsWith("en"));
+        const u1 = new SpeechSynthesisUtterance(text);
+        u1.lang = "en-GB"; u1.rate = 0.85;
+        if (first) u1.voice = first;
+        window.speechSynthesis.speak(u1);
+        const second = voices.find(v => v.lang.startsWith("en") && v !== first);
+        if (second) {
+          const t1 = setTimeout(() => {
+            const u2 = new SpeechSynthesisUtterance(text);
+            u2.lang = "en-GB"; u2.rate = 0.85; u2.voice = second;
+            window.speechSynthesis.speak(u2);
+          }, 1000);
+          speakQueue.push(t1);
+        }
+      }
     }
-
-    // 确保语音列表加载完成
     if (window.speechSynthesis) {
       window.speechSynthesis.onvoiceschanged = () => {};
       window.speechSynthesis.getVoices();
@@ -5485,7 +6382,7 @@ const allData = [
         optsEl.appendChild(btn);
       });
 
-      if (mode === "en2cn") speak(q.en);
+      if (mode === "en2cn") setTimeout(() => speak(q.en), 50);
       document.getElementById("audio-btn").onclick = () => speak(q.en);
       updateStats();
     }
@@ -5503,7 +6400,7 @@ const allData = [
         streak++;
         document.getElementById("feedback").textContent = "回答正确！";
         document.getElementById("feedback").className = "feedback correct";
-        if (mode === "cn2en") speak(q.en);
+        if (mode === "cn2en") setTimeout(() => speak(q.en), 50);
         if (index < queue.length - 1) {
           document.getElementById("next-btn").classList.remove("hidden");
         } else {
@@ -5564,7 +6461,7 @@ const allData = [
         <div class="word-item">
           <div class="left">
             <div class="en">${w.en} <span class="tag">第 ${w.unit} 组</span></div>
-            <div class="ipa-line">/${w.ipa}/</div>
+            <div class="ipa">/${w.ipa}/</div>
           </div>
           <div class="right">
             <div class="cn">${w.cn}</div>
@@ -5638,7 +6535,6 @@ const allData = [
       if (page === "mistakes") renderMistakes();
     }
 
-    // 初始化
     loadMistakes();
     selectedUnits = new Set(getCurrentUnits());
     renderSemesterFilters();

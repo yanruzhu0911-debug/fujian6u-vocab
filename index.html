@@ -211,6 +211,18 @@
       pointer-events: none;
     }
     .toast.show { opacity: 1; }
+  
+    .ipa-line { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .word-item { align-items: flex-start; }
+    .word-item .left { flex: 1; }
+    .word-item .right { text-align: right; max-width: 55%; }
+
+  
+    .ipa-line { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .word-item { align-items: flex-start; }
+    .word-item .left { flex: 1; }
+    .word-item .right { text-align: right; max-width: 55%; }
+
   </style>
 </head>
 <body>
@@ -5373,7 +5385,7 @@ const allData = [
       const container = document.getElementById("unit-filter");
       const wlContainer = document.getElementById("wordlist-unit-filter");
       const units = getCurrentUnits();
-      const html = units.map(u => `<button class="${selectedUnits.has(u) ? 'active' : ''}" data-unit="${u}" onclick="toggleUnit(${u})">Unit ${u}</button>`).join("");
+      const html = units.map(u => `<button class="${selectedUnits.has(u) ? 'active' : ''}" data-unit="${u}" onclick="toggleUnit(${u})">第 ${u} 组</button>`).join("");
       container.innerHTML = html;
       wlContainer.innerHTML = html;
     }
@@ -5381,7 +5393,7 @@ const allData = [
     function toggleUnit(u) {
       if (selectedUnits.has(u)) {
         if (selectedUnits.size > 1) selectedUnits.delete(u);
-        else { showToast("至少选择一个单元"); return; }
+        else { showToast("至少选择一组"); return; }
       } else selectedUnits.add(u);
       renderUnitFilters();
       restartPractice();
@@ -5541,7 +5553,7 @@ const allData = [
       else {
         document.getElementById("prompt").textContent = "";
         document.getElementById("prompt-sub").textContent = "";
-        document.getElementById("options").innerHTML = "<div class='empty'>请选择至少一个单元</div>";
+        document.getElementById("options").innerHTML = "<div class='empty'>请选择至少一组</div>";
       }
     }
 
@@ -5550,11 +5562,14 @@ const allData = [
       const filtered = getSemesterWords(currentSemester).filter(w => selectedUnits.has(w.unit));
       list.innerHTML = filtered.map(w => `
         <div class="word-item">
-          <div>
-            <div class="en">${w.en} <span class="tag">Unit ${w.unit}</span></div>
-            <div style="font-size:12px;color:var(--muted)">/${w.ipa}/</div>
+          <div class="left">
+            <div class="en">${w.en} <span class="tag">第 ${w.unit} 组</span></div>
+            <div class="ipa-line">/${w.ipa}/</div>
           </div>
-          <div class="cn">${w.cn}</div>
+          <div class="right">
+            <div class="cn">${w.cn}</div>
+            <button class="audio-btn" style="width:32px;height:32px;font-size:14px;margin-top:6px;" onclick="event.stopPropagation();speak('${w.en.replace(/'/g, "\'")}')" title="发音">🔊</button>
+          </div>
         </div>
       `).join("");
     }
@@ -5580,7 +5595,7 @@ const allData = [
             <div style="margin-top:6px">
               <span class="tag">${m.semester}</span>
               <span class="tag">${m.mode === "en2cn" ? "英译汉" : "汉译英"}</span>
-              <span class="tag">Unit ${m.unit}</span>
+              <span class="tag">第 ${m.unit} 组</span>
             </div>
           </div>
         `;

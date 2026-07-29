@@ -6356,7 +6356,7 @@
       const q = currentQuestion;
       const direction = mode === "en2cn" ? "请选择正确的中文释义" : "请选择正确的英文单词/词组";
       const prompt = mode === "en2cn" ? q.en : q.cn;
-      const sub = mode === "en2cn" ? `/${q.ipa}/` : "";
+      const sub = mode === "en2cn" && q.ipa ? `/${q.ipa}/` : "";
       document.getElementById("direction").textContent = direction;
       document.getElementById("prompt").textContent = prompt;
       document.getElementById("prompt-sub").textContent = sub;
@@ -6382,8 +6382,9 @@
         optsEl.appendChild(btn);
       });
 
+      document.getElementById("audio-btn").style.visibility = mode === "en2cn" ? "visible" : "hidden";
       if (mode === "en2cn") setTimeout(() => speak(q.en), 50);
-      document.getElementById("audio-btn").onclick = () => speak(q.en);
+      document.getElementById("audio-btn").onclick = () => { if (mode === "en2cn") speak(q.en); };
       updateStats();
     }
 
@@ -6400,7 +6401,7 @@
         streak++;
         document.getElementById("feedback").textContent = "回答正确！";
         document.getElementById("feedback").className = "feedback correct";
-        if (mode === "cn2en") setTimeout(() => speak(q.en), 50);
+        // 汉译英不自动发音
         if (index < queue.length - 1) {
           document.getElementById("next-btn").classList.remove("hidden");
         } else {

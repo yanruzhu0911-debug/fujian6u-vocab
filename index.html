@@ -6382,9 +6382,10 @@
         optsEl.appendChild(btn);
       });
 
-      document.getElementById("audio-btn").style.visibility = mode === "en2cn" ? "visible" : "hidden";
+      const ab = document.getElementById("audio-btn");
+      ab.style.display = mode === "en2cn" ? "inline-flex" : "none";
       if (mode === "en2cn") setTimeout(() => speak(q.en), 50);
-      document.getElementById("audio-btn").onclick = () => { if (mode === "en2cn") speak(q.en); };
+      ab.onclick = () => { if (mode === "en2cn") speak(q.en); };
       updateStats();
     }
 
@@ -6462,7 +6463,7 @@
         <div class="word-item">
           <div class="left">
             <div class="en">${w.en} <span class="tag">第 ${w.unit} 组</span></div>
-            <div class="ipa">/${w.ipa}/</div>
+            <div class="ipa">${w.ipa ? '/' + w.ipa + '/' : ''}</div>
           </div>
           <div class="right">
             <div class="cn">${w.cn}</div>

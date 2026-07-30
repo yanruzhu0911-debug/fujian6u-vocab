@@ -6317,6 +6317,38 @@
 
     let audio = new Audio();
     let speakQueue = [];
+    // Web Audio API generated feedback sounds (<0.5s), no external files
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523, now);
+          osc.frequency.setValueAtTime(659, now + 0.08);
+          osc.frequency.setValueAtTime(784, now + 0.16);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.3, now + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(200, now);
+          osc.frequency.linearRampToValueAtTime(150, now + 0.25);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.25, now + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        }
+      } catch {}
+    }
+
     function speak(text) {
       if (!text) return;
       speakQueue.forEach(t => clearTimeout(t));
@@ -6334,15 +6366,6 @@
         u1.lang = "en-GB"; u1.rate = 0.85;
         if (first) u1.voice = first;
         window.speechSynthesis.speak(u1);
-        const second = voices.find(v => v.lang.startsWith("en") && v !== first);
-        if (second) {
-          const t1 = setTimeout(() => {
-            const u2 = new SpeechSynthesisUtterance(text);
-            u2.lang = "en-GB"; u2.rate = 0.85; u2.voice = second;
-            window.speechSynthesis.speak(u2);
-          }, 1000);
-          speakQueue.push(t1);
-        }
       }
     }
     if (window.speechSynthesis) {
@@ -6356,7 +6379,7 @@
       const q = currentQuestion;
       const direction = mode === "en2cn" ? "请选择正确的中文释义" : "请选择正确的英文单词/词组";
       const prompt = mode === "en2cn" ? q.en : q.cn;
-      const sub = mode === "en2cn" && q.ipa ? `/${q.ipa}/` : "";
+      const sub = mode === "en2cn" && q.ipa ? q.ipa : "";
       document.getElementById("direction").textContent = direction;
       document.getElementById("prompt").textContent = prompt;
       document.getElementById("prompt-sub").textContent = sub;
@@ -6386,6 +6409,7 @@
       ab.style.display = mode === "en2cn" ? "inline-flex" : "none";
       if (mode === "en2cn") setTimeout(() => speak(q.en), 50);
       ab.onclick = () => { if (mode === "en2cn") speak(q.en); };
+
       updateStats();
     }
 
@@ -6402,6 +6426,7 @@
         streak++;
         document.getElementById("feedback").textContent = "回答正确！";
         document.getElementById("feedback").className = "feedback correct";
+        playSound('correct');
         // 汉译英不自动发音
         if (index < queue.length - 1) {
           document.getElementById("next-btn").classList.remove("hidden");
@@ -6414,6 +6439,7 @@
         streak = 0;
         document.getElementById("feedback").textContent = "回答错误，请重新选择";
         document.getElementById("feedback").className = "feedback wrong";
+        playSound('wrong');
         addMistake(q);
         setTimeout(() => {
           btn.classList.remove("wrong");
@@ -6463,7 +6489,7 @@
         <div class="word-item">
           <div class="left">
             <div class="en">${w.en} <span class="tag">第 ${w.unit} 组</span></div>
-            <div class="ipa">${w.ipa ? '/' + w.ipa + '/' : ''}</div>
+            <div class="ipa">${w.ipa || ''}</div>
           </div>
           <div class="right">
             <div class="cn">${w.cn}</div>

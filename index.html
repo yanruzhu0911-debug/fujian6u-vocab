@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -214,6 +214,22 @@
       pointer-events: none;
     }
     .toast.show { opacity: 1; }
+  
+    .stats-summary { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom:20px; }
+    .summary-card { background:#f9fafb; border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+    .summary-card .num { font-size:26px; font-weight:700; color:var(--primary); }
+    .summary-card .label { font-size:13px; color:var(--muted); margin-top:4px; }
+    .stats-months { display:flex; flex-direction:column; gap:14px; }
+    .month-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    .month-header { background:#f3f4f6; padding:12px 16px; font-weight:600; font-size:15px; display:flex; justify-content:space-between; }
+    .month-body { padding:10px 16px; }
+    .day-row { border-bottom:1px solid #f3f4f6; padding:10px 0; }
+    .day-row:last-child { border-bottom:none; }
+    .day-date { font-weight:600; font-size:14px; margin-bottom:6px; }
+    .day-line { font-size:13px; color:var(--muted); display:flex; justify-content:space-between; margin:3px 0; }
+    .day-line span { color:var(--text); font-weight:500; }
+    .empty-stats { text-align:center; color:var(--muted); padding:30px 0; }
+
   </style>
 </head>
 <body>
@@ -222,6 +238,7 @@
     <nav>
       <button id="nav-practice" class="active" onclick="showPage('practice')">背词</button>
       <button id="nav-wordlist" onclick="showPage('wordlist')">词表</button>
+      <button id="nav-stats" onclick="showPage('stats')">统计</button>
       <button id="nav-mistakes" onclick="showPage('mistakes')">错题</button>
     </nav>
   </header>
@@ -260,6 +277,17 @@
         <div class="semester-select" id="wordlist-semester-select"></div>
         <div class="unit-filter" id="wordlist-unit-filter"></div>
         <div class="word-list" id="word-list"></div>
+      </div>
+    </section>
+
+    <section id="page-stats" class="hidden">
+      <div class="card">
+        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>学习统计</span>
+          <button class="btn-secondary" style="width:auto;padding:8px 14px;margin:0;font-size:13px;" onclick="clearStats()">清空记录</button>
+        </div>
+        <div class="stats-summary" id="stats-summary"></div>
+        <div class="stats-months" id="stats-months"></div>
       </div>
     </section>
 
@@ -6267,6 +6295,7 @@
     }
 
     function setSemester(sem) {
+      endPracticeSession();
       currentSemester = sem;
       selectedUnits = new Set(getCurrentUnits());
       renderSemesterFilters();
@@ -6283,6 +6312,7 @@
     }
 
     function toggleUnit(u) {
+      endPracticeSession();
       if (selectedUnits.has(u)) {
         if (selectedUnits.size > 1) selectedUnits.delete(u);
         else { showToast("至少选择一组"); return; }
@@ -6293,6 +6323,7 @@
     }
 
     function setMode(m) {
+      endPracticeSession();
       mode = m;
       document.getElementById("mode-en2cn").classList.toggle("active", m === "en2cn");
       document.getElementById("mode-cn2en").classList.toggle("active", m === "cn2en");
@@ -6305,6 +6336,7 @@
       index = 0;
       streak = 0;
       answered = false;
+      startPracticeSession(mode);
       updateStats();
     }
 
@@ -6427,6 +6459,7 @@
         document.getElementById("feedback").textContent = "回答正确！";
         document.getElementById("feedback").className = "feedback correct";
         playSound('correct');
+        recordPracticeWord(q.en);
         // 汉译英不自动发音
         if (index < queue.length - 1) {
           document.getElementById("next-btn").classList.remove("hidden");
@@ -6465,6 +6498,7 @@
         index++;
         renderQuestion();
       } else {
+        endPracticeSession();
         document.getElementById("feedback").textContent = "本组练习完成！";
         document.getElementById("feedback").className = "feedback correct";
         document.getElementById("next-btn").classList.add("hidden");
@@ -6472,6 +6506,7 @@
     }
 
     function restartPractice() {
+      endPracticeSession();
       buildQueue();
       document.getElementById("next-btn").textContent = "下一题";
       if (queue.length) renderQuestion();
@@ -6485,6 +6520,8 @@
     function renderWordList() {
       const list = document.getElementById("word-list");
       const filtered = getSemesterWords(currentSemester).filter(w => selectedUnits.has(w.unit));
+      // record once per word view in wordlist
+      filtered.forEach(w => recordWordList(currentSemester, mode));
       list.innerHTML = filtered.map(w => `
         <div class="word-item">
           <div class="left">
@@ -6555,12 +6592,143 @@
       renderMistakes();
     }
 
+
+    // ================= 学习统计 =================
+    const STATS_KEY = "fujian_vocab_stats";
+    let statsData = loadStats();
+    let sessionStart = null;
+    let sessionWords = new Set();
+    let sessionMode = null;
+
+    function loadStats() {
+      try {
+        const raw = localStorage.getItem(STATS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return {};
+    }
+    function saveStats() {
+      localStorage.setItem(STATS_KEY, JSON.stringify(statsData));
+    }
+    function monthKey(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    }
+    function dayKey(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+    function ensureDate(month, day) {
+      if (!statsData[month]) statsData[month] = {};
+      if (!statsData[month][day]) statsData[month][day] = { wordlist: { en2cn:0, cn2en:0 }, practice: { en2cn:0, cn2en:0 } };
+    }
+    function recordWordList(sem, m) {
+      const now = new Date();
+      const mk = monthKey(now), dk = dayKey(now);
+      ensureDate(mk, dk);
+      // count unique words learned in wordlist per mode
+      statsData[mk][dk].wordlist[m] += 1;
+      saveStats();
+    }
+    function startPracticeSession(m) {
+      sessionStart = Date.now();
+      sessionWords = new Set();
+      sessionMode = m;
+    }
+    function recordPracticeWord(en) {
+      if (sessionWords) sessionWords.add(en);
+    }
+    function endPracticeSession() {
+      if (!sessionStart || !sessionMode) return;
+      const elapsed = Math.max(0, Math.round((Date.now() - sessionStart) / 1000));
+      if (elapsed < 3 && sessionWords.size === 0) return;
+      const now = new Date();
+      const mk = monthKey(now), dk = dayKey(now);
+      ensureDate(mk, dk);
+      const rec = statsData[mk][dk].practice[sessionMode];
+      // store as object: {seconds, words} accumulated
+      if (typeof rec === 'number') {
+        statsData[mk][dk].practice[sessionMode] = { seconds: elapsed, words: sessionWords.size };
+      } else {
+        rec.seconds += elapsed;
+        rec.words += sessionWords.size;
+      }
+      saveStats();
+      sessionStart = null;
+      sessionWords = new Set();
+      sessionMode = null;
+    }
+
+    function renderStats() {
+      const summary = document.getElementById("stats-summary");
+      const months = document.getElementById("stats-months");
+      const keys = Object.keys(statsData).sort().reverse();
+      let totalList = 0, totalPractice = 0, totalTime = 0;
+      keys.forEach(mk => {
+        Object.values(statsData[mk]).forEach(day => {
+          totalList += (day.wordlist.en2cn || 0) + (day.wordlist.cn2en || 0);
+          const p1 = day.practice.en2cn || {seconds:0,words:0};
+          const p2 = day.practice.cn2en || {seconds:0,words:0};
+          totalPractice += (typeof p1 === 'number' ? p1 : p1.words) + (typeof p2 === 'number' ? p2 : p2.words);
+          totalTime += (typeof p1 === 'number' ? 0 : p1.seconds) + (typeof p2 === 'number' ? 0 : p2.seconds);
+        });
+      });
+      summary.innerHTML = `
+        <div class="summary-card"><div class="num">${totalList}</div><div class="label">词表学习单词</div></div>
+        <div class="summary-card"><div class="num">${totalPractice}</div><div class="label">背词练习单词</div></div>
+        <div class="summary-card"><div class="num">${Math.round(totalTime/60)}</div><div class="label">背词分钟</div></div>
+        <div class="summary-card"><div class="num">${keys.length}</div><div class="label">记录月份</div></div>
+      `;
+      if (!keys.length) {
+        months.innerHTML = '<div class="empty-stats">暂无记录，开始学习吧！</div>';
+        return;
+      }
+      months.innerHTML = keys.map(mk => {
+        const [y, mon] = mk.split('-');
+        const days = Object.keys(statsData[mk]).sort().reverse();
+        return `<div class="month-card">
+          <div class="month-header"><span>${y}年${parseInt(mon)}月</span><span>${days.length} 天</span></div>
+          <div class="month-body">
+            ${days.map(dk => {
+              const day = statsData[mk][dk];
+              const d = new Date(dk + 'T00:00:00');
+              const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
+              const listEn = day.wordlist.en2cn || 0;
+              const listCn = day.wordlist.cn2en || 0;
+              const pEn = day.practice.en2cn || {seconds:0,words:0};
+              const pCn = day.practice.cn2en || {seconds:0,words:0};
+              const pEnWords = typeof pEn === 'number' ? pEn : pEn.words;
+              const pCnWords = typeof pCn === 'number' ? pCn : pCn.words;
+              const pEnSec = typeof pEn === 'number' ? 0 : pEn.seconds;
+              const pCnSec = typeof pCn === 'number' ? 0 : pCn.seconds;
+              const totalSec = pEnSec + pCnSec;
+              const timeStr = totalSec < 60 ? `${totalSec}秒` : `${Math.floor(totalSec/60)}分${totalSec%60}秒`;
+              return `<div class="day-row">
+                <div class="day-date">${dateStr}</div>
+                <div class="day-line">词表英译汉 <span>${listEn} 词</span></div>
+                <div class="day-line">词表汉译英 <span>${listCn} 词</span></div>
+                <div class="day-line">背词英译汉 <span>${pEnWords} 词 / ${pEnSec<60?pEnSec+'秒':Math.floor(pEnSec/60)+'分'+pEnSec%60+'秒'}</span></div>
+                <div class="day-line">背词汉译英 <span>${pCnWords} 词 / ${pCnSec<60?pCnSec+'秒':Math.floor(pCnSec/60)+'分'+pCnSec%60+'秒'}</span></div>
+                <div class="day-line">合计背词时间 <span>${timeStr}</span></div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('');
+    }
+    function clearStats() {
+      if (!confirm("确定清空所有学习统计吗？此操作不可恢复。")) return;
+      statsData = {};
+      saveStats();
+      renderStats();
+    }
+
     function showPage(page) {
-      ["practice","wordlist","mistakes"].forEach(p => document.getElementById("page-"+p).classList.add("hidden"));
+      if (page !== "practice") endPracticeSession();
+      ["practice","wordlist","mistakes","stats"].forEach(p => document.getElementById("page-"+p).classList.add("hidden"));
       document.getElementById("page-"+page).classList.remove("hidden");
-      ["practice","wordlist","mistakes"].forEach(p => document.getElementById("nav-"+p).classList.toggle("active", p === page));
+      ["practice","wordlist","mistakes","stats"].forEach(p => document.getElementById("nav-"+p).classList.toggle("active", p === page));
       if (page === "wordlist") renderWordList();
       if (page === "mistakes") renderMistakes();
+      if (page === "stats") renderStats();
     }
 
     loadMistakes();
@@ -6569,6 +6737,9 @@
     renderUnitFilters();
     restartPractice();
     renderMistakes();
+    renderStats();
+
+    window.addEventListener("beforeunload", () => endPracticeSession());
   </script>
 </body>
 </html>

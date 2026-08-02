@@ -28,38 +28,39 @@
     header {
       background: var(--primary);
       color: #fff;
-      padding: 12px 16px;
+      padding: 12px 16px 14px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       position: sticky;
       top: 0;
       z-index: 10;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+    header h1 { font-size: 18px; margin: 0 0 12px; font-weight: 600; }
     header nav {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
       gap: 8px;
-      margin-top: 8px;
       width: 100%;
     }
     header nav button {
       background: rgba(255,255,255,0.2);
-      border: none;
+      border: 1px solid rgba(255,255,255,0.25);
       color: #fff;
-      padding: 6px 14px;
+      padding: 8px 0;
       border-radius: 16px;
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
       white-space: nowrap;
-      flex: 1 1 auto;
-      min-width: 60px;
-      max-width: 90px;
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: none;
+      text-align: center;
     }
-    header nav button.active { background: #fff; color: var(--primary); }
+    header nav button.active { background: #fff; color: var(--primary); border-color:#fff; font-weight:600; }
     main { flex: 1; overflow-y: auto; padding: 16px; }
     .card {
       background: var(--card);
@@ -306,8 +307,27 @@
       <div class="card">
         <div class="section-title">错题整理</div>
         <div id="mistake-list"></div>
-        <button class="btn-primary" id="retest-btn" onclick="startRetest()">重测错题</button>
-        <button class="btn-secondary" onclick="clearMistakes()">清空错题</button>
+        <div id="retest-area" class="hidden" style="margin-top:8px;">
+          <div class="progress-bar"><div class="progress-fill" id="retest-progress-fill"></div></div>
+          <div class="stats" style="margin-bottom:16px;">
+            <span id="retest-stat-progress">进度 0/0</span>
+            <span id="retest-stat-streak">连对 0</span>
+          </div>
+          <div class="question-box">
+            <div class="direction" id="retest-direction">请选择正确的中文释义</div>
+            <div class="prompt" id="retest-prompt"></div>
+            <button class="audio-btn" id="retest-audio-btn" title="发音">🔊</button>
+            <div class="prompt-sub" id="retest-prompt-sub"></div>
+          </div>
+          <div class="options" id="retest-options"></div>
+          <div class="feedback" id="retest-feedback"></div>
+          <button class="btn-primary hidden" id="retest-next-btn" onclick="nextRetestQuestion()">下一题</button>
+          <button class="btn-secondary" onclick="exitRetest()" style="margin-top:10px;">返回错题列表</button>
+        </div>
+        <div id="mistake-actions">
+          <button class="btn-primary" id="retest-btn" onclick="startRetest()">重测错题</button>
+          <button class="btn-secondary" onclick="clearMistakes()">清空错题</button>
+        </div>
       </div>
     </section>
   </main>
@@ -6531,8 +6551,6 @@
     function renderWordList() {
       const list = document.getElementById("word-list");
       const filtered = getSemesterWords(currentSemester).filter(w => selectedUnits.has(w.unit));
-      // record once per word view in wordlist
-      filtered.forEach(w => recordWordList(currentSemester, mode));
       list.innerHTML = filtered.map(w => `
         <div class="word-item">
           <div class="left">
@@ -6575,31 +6593,112 @@
       }).join("");
     }
 
+    let retestQueue = [], retestIndex = 0, retestStreak = 0, retestAnswered = false, retestMode = false;
+
     function startRetest() {
       if (!mistakes.length) return;
       const pool = mistakes.map(m => {
         const found = allWords.find(w => w.en === m.en && w.semester === m.semester);
         return found || m;
       });
-      currentSemester = mistakes[0].semester;
-      selectedUnits = new Set(getCurrentUnits());
-      mode = "en2cn";
-      document.getElementById("mode-en2cn").classList.add("active");
-      document.getElementById("mode-cn2en").classList.remove("active");
-      renderSemesterFilters();
-      renderUnitFilters();
-      queue = shuffle(pool);
-      index = 0;
-      streak = 0;
-      answered = false;
-      showPage("practice");
-      renderQuestion();
+      retestQueue = shuffle(pool);
+      retestIndex = 0;
+      retestStreak = 0;
+      retestAnswered = false;
+      retestMode = true;
+      document.getElementById("mistake-list").classList.add("hidden");
+      document.getElementById("mistake-actions").classList.add("hidden");
+      document.getElementById("retest-area").classList.remove("hidden");
+      renderRetestQuestion();
+    }
+
+    function exitRetest() {
+      retestMode = false;
+      retestQueue = [];
+      document.getElementById("retest-area").classList.add("hidden");
+      document.getElementById("mistake-list").classList.remove("hidden");
+      document.getElementById("mistake-actions").classList.remove("hidden");
+      renderMistakes();
+    }
+
+    function renderRetestQuestion() {
+      if (retestIndex >= retestQueue.length) {
+        document.getElementById("retest-prompt").textContent = "🎉 错题重测完成";
+        document.getElementById("retest-prompt-sub").textContent = `共 ${retestQueue.length} 题，连对 ${retestStreak} 题`;
+        document.getElementById("retest-options").innerHTML = "";
+        document.getElementById("retest-feedback").className = "feedback";
+        document.getElementById("retest-feedback").textContent = "";
+        document.getElementById("retest-next-btn").classList.add("hidden");
+        document.getElementById("retest-audio-btn").style.display = "none";
+        document.getElementById("retest-direction").textContent = "";
+        document.getElementById("retest-stat-progress").textContent = `进度 ${retestQueue.length}/${retestQueue.length}`;
+        document.getElementById("retest-stat-streak").textContent = `连对 ${retestStreak}`;
+        document.getElementById("retest-progress-fill").style.width = "100%";
+        return;
+      }
+      const q = retestQueue[retestIndex];
+      document.getElementById("retest-stat-progress").textContent = `进度 ${retestIndex+1}/${retestQueue.length}`;
+      document.getElementById("retest-stat-streak").textContent = `连对 ${retestStreak}`;
+      document.getElementById("retest-progress-fill").style.width = `${((retestIndex+1)/retestQueue.length)*100}%`;
+      document.getElementById("retest-direction").textContent = "请选择正确的中文释义";
+      document.getElementById("retest-prompt").textContent = q.en;
+      document.getElementById("retest-prompt-sub").textContent = q.ipa || "";
+      document.getElementById("retest-feedback").className = "feedback";
+      document.getElementById("retest-feedback").textContent = "";
+      document.getElementById("retest-next-btn").classList.add("hidden");
+      const others = allWords.filter(w => w.en !== q.en).map(w => w.cn);
+      const distractors = shuffle(others).slice(0, 3);
+      const opts = shuffle([q.cn, ...distractors]);
+      const optsEl = document.getElementById("retest-options");
+      optsEl.innerHTML = "";
+      opts.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = opt;
+        btn.onclick = () => handleRetestAnswer(opt, btn);
+        optsEl.appendChild(btn);
+      });
+      const ab = document.getElementById("retest-audio-btn");
+      ab.style.display = "inline-flex";
+      setTimeout(() => speak(q.en), 50);
+      ab.onclick = () => speak(q.en);
+      retestAnswered = false;
+    }
+
+    function handleRetestAnswer(selected, btn) {
+      if (retestAnswered) return;
+      retestAnswered = true;
+      const q = retestQueue[retestIndex];
+      const correct = q.cn;
+      const isCorrect = selected === correct;
+      if (isCorrect) {
+        retestStreak += 1;
+        btn.classList.add("correct");
+        document.getElementById("retest-feedback").className = "feedback correct";
+        document.getElementById("retest-feedback").textContent = "回答正确！";
+        playSound("correct");
+      } else {
+        retestStreak = 0;
+        btn.classList.add("wrong");
+        document.getElementById("retest-feedback").className = "feedback wrong";
+        document.getElementById("retest-feedback").textContent = `正确答案：${correct}`;
+        playSound("wrong");
+      }
+      Array.from(document.getElementById("retest-options").children).forEach(b => b.classList.add("disabled"));
+      document.getElementById("retest-stat-streak").textContent = `连对 ${retestStreak}`;
+      document.getElementById("retest-next-btn").classList.remove("hidden");
+    }
+
+    function nextRetestQuestion() {
+      retestIndex += 1;
+      renderRetestQuestion();
     }
 
     function clearMistakes() {
       if (!confirm("确定清空所有错题吗？")) return;
       mistakes = [];
       saveMistakes();
+      if (retestMode) exitRetest();
       renderMistakes();
     }
 
@@ -6629,15 +6728,7 @@
     }
     function ensureDate(month, day) {
       if (!statsData[month]) statsData[month] = {};
-      if (!statsData[month][day]) statsData[month][day] = { wordlist: { en2cn:0, cn2en:0 }, practice: { en2cn:0, cn2en:0 } };
-    }
-    function recordWordList(sem, m) {
-      const now = new Date();
-      const mk = monthKey(now), dk = dayKey(now);
-      ensureDate(mk, dk);
-      // count unique words learned in wordlist per mode
-      statsData[mk][dk].wordlist[m] += 1;
-      saveStats();
+      if (!statsData[month][day]) statsData[month][day] = { practice: { en2cn:{seconds:0,words:0}, cn2en:{seconds:0,words:0} } };
     }
     function startPracticeSession(m) {
       sessionStart = Date.now();
@@ -6672,10 +6763,9 @@
       const summary = document.getElementById("stats-summary");
       const months = document.getElementById("stats-months");
       const keys = Object.keys(statsData).sort().reverse();
-      let totalList = 0, totalPractice = 0, totalTime = 0;
+      let totalPractice = 0, totalTime = 0;
       keys.forEach(mk => {
         Object.values(statsData[mk]).forEach(day => {
-          totalList += (day.wordlist.en2cn || 0) + (day.wordlist.cn2en || 0);
           const p1 = day.practice.en2cn || {seconds:0,words:0};
           const p2 = day.practice.cn2en || {seconds:0,words:0};
           totalPractice += (typeof p1 === 'number' ? p1 : p1.words) + (typeof p2 === 'number' ? p2 : p2.words);
@@ -6683,7 +6773,6 @@
         });
       });
       summary.innerHTML = `
-        <div class="summary-card"><div class="num">${totalList}</div><div class="label">词表学习单词</div></div>
         <div class="summary-card"><div class="num">${totalPractice}</div><div class="label">背词练习单词</div></div>
         <div class="summary-card"><div class="num">${Math.round(totalTime/60)}</div><div class="label">背词分钟</div></div>
         <div class="summary-card"><div class="num">${keys.length}</div><div class="label">记录月份</div></div>
@@ -6702,8 +6791,6 @@
               const day = statsData[mk][dk];
               const d = new Date(dk + 'T00:00:00');
               const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
-              const listEn = day.wordlist.en2cn || 0;
-              const listCn = day.wordlist.cn2en || 0;
               const pEn = day.practice.en2cn || {seconds:0,words:0};
               const pCn = day.practice.cn2en || {seconds:0,words:0};
               const pEnWords = typeof pEn === 'number' ? pEn : pEn.words;
@@ -6714,8 +6801,6 @@
               const timeStr = totalSec < 60 ? `${totalSec}秒` : `${Math.floor(totalSec/60)}分${totalSec%60}秒`;
               return `<div class="day-row">
                 <div class="day-date">${dateStr}</div>
-                <div class="day-line">词表英译汉 <span>${listEn} 词</span></div>
-                <div class="day-line">词表汉译英 <span>${listCn} 词</span></div>
                 <div class="day-line">背词英译汉 <span>${pEnWords} 词 / ${pEnSec<60?pEnSec+'秒':Math.floor(pEnSec/60)+'分'+pEnSec%60+'秒'}</span></div>
                 <div class="day-line">背词汉译英 <span>${pCnWords} 词 / ${pCnSec<60?pCnSec+'秒':Math.floor(pCnSec/60)+'分'+pCnSec%60+'秒'}</span></div>
                 <div class="day-line">合计背词时间 <span>${timeStr}</span></div>

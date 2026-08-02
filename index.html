@@ -6330,6 +6330,10 @@
       return new Set(units.slice(0, 2));
     }
 
+    function isPracticePageVisible() {
+      return !document.getElementById("page-practice").classList.contains("hidden");
+    }
+
     function setSemester(sem) {
       endPracticeSession();
       currentSemester = sem;
@@ -6337,7 +6341,7 @@
       renderSemesterFilters();
       renderUnitFilters();
       renderWordList();
-      restartPractice();
+      if (isPracticePageVisible()) restartPractice();
     }
 
     function renderUnitFilters() {
@@ -6354,7 +6358,7 @@
         else { showToast("至少选择一组"); return; }
       } else selectedUnits.add(u);
       renderUnitFilters();
-      restartPractice();
+      if (isPracticePageVisible()) restartPractice();
       renderWordList();
     }
 

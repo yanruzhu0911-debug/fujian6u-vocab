@@ -6325,10 +6325,15 @@
       document.getElementById("wordlist-semester-select").innerHTML = html;
     }
 
+    function getDefaultSelectedUnits() {
+      const units = getCurrentUnits();
+      return new Set(units.slice(0, 2));
+    }
+
     function setSemester(sem) {
       endPracticeSession();
       currentSemester = sem;
-      selectedUnits = new Set(getCurrentUnits());
+      selectedUnits = getDefaultSelectedUnits();
       renderSemesterFilters();
       renderUnitFilters();
       renderWordList();
@@ -6550,7 +6555,16 @@
 
     function renderWordList() {
       const list = document.getElementById("word-list");
+      const units = getCurrentUnits();
       const filtered = getSemesterWords(currentSemester).filter(w => selectedUnits.has(w.unit));
+      if (!units.length) {
+        list.innerHTML = "<div class='empty'>该学期暂无单词</div>";
+        return;
+      }
+      if (!selectedUnits.size) {
+        list.innerHTML = "<div class='empty'>请选择要查看的分组</div>";
+        return;
+      }
       list.innerHTML = filtered.map(w => `
         <div class="word-item">
           <div class="left">
@@ -6828,7 +6842,7 @@
     }
 
     loadMistakes();
-    selectedUnits = new Set(getCurrentUnits());
+    selectedUnits = getDefaultSelectedUnits();
     renderSemesterFilters();
     renderUnitFilters();
     restartPractice();

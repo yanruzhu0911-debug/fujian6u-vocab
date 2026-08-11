@@ -241,6 +241,12 @@
     .day-line { font-size:13px; color:var(--muted); display:flex; justify-content:space-between; margin:3px 0; }
     .day-line span { color:var(--text); font-weight:500; }
     .empty-stats { text-align:center; color:var(--muted); padding:30px 0; }
+    .word-table-toggle { margin-top:10px; color:var(--primary); font-size:13px; cursor:pointer; display:inline-block; font-weight:600; }
+    .word-table { margin-top:8px; overflow-x:auto; }
+    .word-table table { width:100%; border-collapse:collapse; font-size:13px; }
+    .word-table th, .word-table td { padding:8px 6px; border-bottom:1px solid var(--border); text-align:left; }
+    .word-table th { color:var(--muted); font-weight:600; background:#f9fafb; }
+    .word-table td:first-child { font-weight:600; }
 
   </style>
 </head>
@@ -6499,7 +6505,7 @@
         document.getElementById("feedback").textContent = "回答正确！";
         document.getElementById("feedback").className = "feedback correct";
         playSound('correct');
-        recordPracticeWord(q.en);
+        recordPracticeWord(q);
         // 汉译英不自动发音
         if (index < queue.length - 1) {
           document.getElementById("next-btn").classList.remove("hidden");
@@ -6725,7 +6731,7 @@
     const STATS_KEY = "fujian_vocab_stats";
     let statsData = loadStats();
     let sessionStart = null;
-    let sessionWords = new Set();
+    let sessionWords = new Map();
     let sessionMode = null;
 
     function loadStats() {
@@ -6746,15 +6752,19 @@
     }
     function ensureDate(month, day) {
       if (!statsData[month]) statsData[month] = {};
-      if (!statsData[month][day]) statsData[month][day] = { practice: { en2cn:{seconds:0,words:0}, cn2en:{seconds:0,words:0} } };
+      if (!statsData[month][day]) statsData[month][day] = { practice: { en2cn:{seconds:0,words:0,wordList:[]}, cn2en:{seconds:0,words:0,wordList:[]} }, wordList: [] };
     }
     function startPracticeSession(m) {
       sessionStart = Date.now();
-      sessionWords = new Set();
+      sessionWords = new Map();
       sessionMode = m;
     }
-    function recordPracticeWord(en) {
-      if (sessionWords) sessionWords.add(en);
+    function recordPracticeWord(q) {
+      if (!sessionWords) return;
+      const key = q.en + "|" + sessionMode;
+      if (!sessionWords.has(key)) {
+        sessionWords.set(key, { en: q.en, cn: q.cn, mode: sessionMode, at: Date.now() });
+      }
     }
     function endPracticeSession() {
       if (!sessionStart || !sessionMode) return;
@@ -6766,14 +6776,25 @@
       const rec = statsData[mk][dk].practice[sessionMode];
       // store as object: {seconds, words} accumulated
       if (typeof rec === 'number') {
-        statsData[mk][dk].practice[sessionMode] = { seconds: elapsed, words: sessionWords.size };
+        statsData[mk][dk].practice[sessionMode] = { seconds: elapsed, words: sessionWords.size, wordList: [...sessionWords.values()] };
       } else {
         rec.seconds += elapsed;
         rec.words += sessionWords.size;
+        if (!rec.wordList) rec.wordList = [];
+        const existing = new Set(rec.wordList.map(w => w.en + "|" + w.mode));
+        sessionWords.forEach((w, key) => {
+          if (!existing.has(key)) rec.wordList.push(w);
+        });
       }
+      const dayRec = statsData[mk][dk];
+      if (!dayRec.wordList) dayRec.wordList = [];
+      const dayExisting = new Set(dayRec.wordList.map(w => w.en + "|" + w.mode));
+      sessionWords.forEach((w, key) => {
+        if (!dayExisting.has(key)) dayRec.wordList.push(w);
+      });
       saveStats();
       sessionStart = null;
-      sessionWords = new Set();
+      sessionWords = new Map();
       sessionMode = null;
     }
 
@@ -6817,11 +6838,25 @@
               const pCnSec = typeof pCn === 'number' ? 0 : pCn.seconds;
               const totalSec = pEnSec + pCnSec;
               const timeStr = totalSec < 60 ? `${totalSec}秒` : `${Math.floor(totalSec/60)}分${totalSec%60}秒`;
+              const wordList = (day.wordList || []).sort((a,b)=>a.at-b.at);
+              const wordsId = 'words-' + mk + '-' + dk;
+              const wordsTable = wordList.length ? `
+                <div class="word-table-toggle" onclick="document.getElementById('${wordsId}').classList.toggle('hidden')">查看今日单词</div>
+                <div class="word-table hidden" id="${wordsId}">
+                  <table>
+                    <thead><tr><th>单词</th><th>释义</th><th>模式</th></tr></thead>
+                    <tbody>
+                      ${wordList.map(w => `<tr><td>${w.en}</td><td>${w.cn}</td><td>${w.mode === 'en2cn' ? '英译汉' : '汉译英'}</td></tr>`).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              ` : '';
               return `<div class="day-row">
                 <div class="day-date">${dateStr}</div>
                 <div class="day-line">背词英译汉 <span>${pEnWords} 词 / ${pEnSec<60?pEnSec+'秒':Math.floor(pEnSec/60)+'分'+pEnSec%60+'秒'}</span></div>
                 <div class="day-line">背词汉译英 <span>${pCnWords} 词 / ${pCnSec<60?pCnSec+'秒':Math.floor(pCnSec/60)+'分'+pCnSec%60+'秒'}</span></div>
                 <div class="day-line">合计背词时间 <span>${timeStr}</span></div>
+                ${wordsTable}
               </div>`;
             }).join('')}
           </div>
@@ -6852,6 +6887,32 @@
     restartPractice();
     renderMistakes();
     renderStats();
+
+    // Migration: expand legacy practice word counts into daily wordList using mistakes/allWords data if possible
+    (function migrateStatsWordList() {
+      let changed = false;
+      Object.keys(statsData).forEach(mk => {
+        Object.keys(statsData[mk]).forEach(dk => {
+          const day = statsData[mk][dk];
+          if (!day.wordList && day.practice) {
+            day.wordList = [];
+            ['en2cn','cn2en'].forEach(mode => {
+              const rec = day.practice[mode];
+              const count = typeof rec === 'number' ? rec : (rec && rec.words || 0);
+              if (count > 0 && allWords && allWords.length) {
+                const pool = allWords.slice(0, count);
+                pool.forEach(q => {
+                  day.wordList.push({ en: q.en, cn: q.cn, mode: mode, at: Date.parse(dk + 'T00:00:00') || Date.now() });
+                });
+                if (rec && typeof rec === 'object') rec.wordList = day.wordList.slice(-count);
+              }
+            });
+            changed = true;
+          }
+        });
+      });
+      if (changed) saveStats();
+    })();
 
     window.addEventListener("beforeunload", () => endPracticeSession());
   </script>

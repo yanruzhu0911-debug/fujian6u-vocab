@@ -242,7 +242,11 @@
     .day-line span { color:var(--text); font-weight:500; }
     .empty-stats { text-align:center; color:var(--muted); padding:30px 0; }
     .word-table-toggle { margin-top:10px; color:var(--primary); font-size:13px; cursor:pointer; display:inline-block; font-weight:600; }
-    .word-table { margin-top:8px; overflow-x:auto; }
+    .word-table-wrapper { margin-top:8px; }
+    .word-table-section { margin-top:12px; }
+    .word-table-section:first-child { margin-top:0; }
+    .word-table-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px; }
+    .word-table { overflow-x:auto; }
     .word-table table { width:100%; border-collapse:collapse; font-size:13px; }
     .word-table th, .word-table td { padding:8px 6px; border-bottom:1px solid var(--border); text-align:left; }
     .word-table th { color:var(--muted); font-weight:600; background:#f9fafb; }
@@ -6838,17 +6842,32 @@
               const pCnSec = typeof pCn === 'number' ? 0 : pCn.seconds;
               const totalSec = pEnSec + pCnSec;
               const timeStr = totalSec < 60 ? `${totalSec}秒` : `${Math.floor(totalSec/60)}分${totalSec%60}秒`;
-              const wordList = (day.wordList || []).sort((a,b)=>a.at-b.at);
+              const allWordsList = (day.wordList || []).sort((a,b)=>a.at-b.at);
+              const enWords = allWordsList.filter(w => w.mode === 'en2cn');
+              const cnWords = allWordsList.filter(w => w.mode === 'cn2en');
               const wordsId = 'words-' + mk + '-' + dk;
-              const wordsTable = wordList.length ? `
+              function renderWordRows(list, label, idSuffix) {
+                if (!list.length) return '';
+                const tableId = wordsId + '-' + idSuffix;
+                return `
+                  <div class="word-table-section">
+                    <div class="word-table-title">${label}（${list.length} 词）</div>
+                    <div class="word-table">
+                      <table>
+                        <thead><tr><th>单词</th><th>释义</th></tr></thead>
+                        <tbody>
+                          ${list.map(w => `<tr><td>${w.en}</td><td>${w.cn}</td></tr>`).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                `;
+              }
+              const wordsTable = allWordsList.length ? `
                 <div class="word-table-toggle" onclick="document.getElementById('${wordsId}').classList.toggle('hidden')">查看今日单词</div>
-                <div class="word-table hidden" id="${wordsId}">
-                  <table>
-                    <thead><tr><th>单词</th><th>释义</th><th>模式</th></tr></thead>
-                    <tbody>
-                      ${wordList.map(w => `<tr><td>${w.en}</td><td>${w.cn}</td><td>${w.mode === 'en2cn' ? '英译汉' : '汉译英'}</td></tr>`).join('')}
-                    </tbody>
-                  </table>
+                <div class="word-table-wrapper hidden" id="${wordsId}">
+                  ${renderWordRows(enWords, '英译汉', 'en')}
+                  ${renderWordRows(cnWords, '汉译英', 'cn')}
                 </div>
               ` : '';
               return `<div class="day-row">
